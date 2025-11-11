@@ -1,11 +1,13 @@
 // ==UserScript==
 // @name         Juxtaposition Pretendo Enhancer
-// @namespace    https://funtum.dev/juxtaposition
+// @namespace    https://github.com/ItsFuntum/Juxtaposition-Enhancer
 // @version      2025-11-11
 // @description  Adds a text input popup in the Pretendo nav menu with Close and Send buttons
 // @author       Funtum
 // @match        https://juxt.pretendo.network/*
 // @grant        none
+// @updateURL    https://github.com/ItsFuntum/Juxtaposition-Enhancer/raw/refs/heads/main/Juxtaposition%20Pretendo%20Enhancer.user.js
+// @downloadURL  https://github.com/ItsFuntum/Juxtaposition-Enhancer/raw/refs/heads/main/Juxtaposition%20Pretendo%20Enhancer.user.js
 // ==/UserScript==
 
 (function() {
