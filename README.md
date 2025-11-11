@@ -1,2 +1,2 @@
 # Juxtaposition-Enhancer
-Tampermonkey script that improves Pretendo's Juxtaposition
+Tampermonkey script that improves Pretendo's Juxtaposition on the web
