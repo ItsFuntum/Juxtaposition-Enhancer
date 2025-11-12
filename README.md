@@ -1,6 +1,8 @@
 # Juxtaposition-Enhancer
 Userscript that improves Pretendo's Juxtaposition on the web.
 
+This userscript does things that already exist on other platforms but Juxt has for some reason not added them on the PC/Mobile website and I've got no idea why so I'm doing it myself.
+
 ## Installation
 You need a userscript manager, I recommend [Tampermonkey](https://www.tampermonkey.net).
 
@@ -9,3 +11,4 @@ You need a userscript manager, I recommend [Tampermonkey](https://www.tampermonk
 ## Features
 Currently it allows you to:
 * Create community posts from the web UI
+* Reply to community posts from the web UI
