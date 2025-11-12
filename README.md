@@ -1,4 +1,6 @@
 # Juxtaposition-Enhancer
-Tampermonkey script that improves Pretendo's Juxtaposition on the web
+Userscript that improves Pretendo's Juxtaposition on the web
 
-*Currently it does nothing useful*
+## Features
+Currently it allows you to:
+* Create community posts from the web UI
