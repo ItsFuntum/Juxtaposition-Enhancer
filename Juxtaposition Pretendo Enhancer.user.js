@@ -4,7 +4,7 @@
 // @version      2025-11-12
 // @description  Adds a text input popup in the Pretendo community-top container with Close and Send buttons
 // @author       Funtum
-// @match        https://juxt.pretendo.network/*
+// @match        *://juxt.pretendo.network/*
 // @grant        none
 // @updateURL    https://github.com/ItsFuntum/Juxtaposition-Enhancer/raw/refs/heads/main/Juxtaposition%20Pretendo%20Enhancer.user.js
 // @downloadURL  https://github.com/ItsFuntum/Juxtaposition-Enhancer/raw/refs/heads/main/Juxtaposition%20Pretendo%20Enhancer.user.js
@@ -12,6 +12,12 @@
 
 (function() {
     'use strict';
+
+    // Only show the button if we're on a community page
+    const match = window.location.pathname.match(/^\/titles\/(\d+)/);
+    if (!match) return; // Not a /titles/... page, stop here
+
+    const communityId = match[1];
 
     // --- Wait until .community-info exists ---
     function waitForCommunityInfo(callback) {
@@ -108,9 +114,6 @@
                 alert('Please type something first.');
                 return;
             }
-
-            const match = window.location.pathname.match(/\/titles\/(\d+)/);
-            const communityId = match ? match[1] : null;
 
             const formData = new FormData();
             formData.append("community_id", communityId);
