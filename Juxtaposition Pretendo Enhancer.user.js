@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         Juxtaposition Pretendo Enhancer
 // @namespace    https://github.com/ItsFuntum/Juxtaposition-Enhancer
-// @version      2025-11-11
+// @version      2025-11-12
 // @description  Adds a text input popup in the Pretendo nav menu with Close and Send buttons
 // @author       Funtum
 // @match        https://juxt.pretendo.network/*
@@ -97,14 +97,45 @@
 
         // --- Button logic ---
         closeBtn.addEventListener('click', () => popup.style.display = 'none');
-        sendBtn.addEventListener('click', () => {
+        sendBtn.addEventListener('click', async () => {
             const text = textarea.value.trim();
-            if (text) {
-                alert(`You entered:\n\n${text}`);
-                textarea.value = '';
-                popup.style.display = 'none';
-            } else {
+            if (!text) {
                 alert('Please type something first.');
+                return;
+            }
+
+            const match = window.location.pathname.match(/\/titles\/(\d+)/);
+            const communityId = match ? match[1] : null;
+
+            const formData = new FormData();
+            formData.append("community_id", communityId);
+            formData.append("body", text);
+            formData.append("feeling_id", "0");
+            formData.append("is_autopost", "0");
+            formData.append("language_id", "1"); // English
+            formData.append("is_spoiler", "0");
+            formData.append("is_app_jumpable", "0");
+
+            try {
+                const response = await fetch("/posts/new", {
+                    method: "POST",
+                    body: formData,
+                    credentials: "include"
+                });
+
+                const data = await response.text();
+                console.log("Server response:", data);
+
+                if (response.ok) {
+                    alert("Post sent successfully!");
+                    textarea.value = '';
+                    popup.style.display = 'none';
+                } else {
+                    alert("Failed to post. Check console for details.");
+                }
+            } catch (err) {
+                console.error("Error sending post:", err);
+                alert("Error sending post.");
             }
         });
 
