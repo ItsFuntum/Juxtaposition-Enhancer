@@ -2,7 +2,7 @@
 // @name         Juxtaposition Pretendo Enhancer
 // @namespace    https://github.com/ItsFuntum/Juxtaposition-Enhancer
 // @version      2025-11-12
-// @description  Adds a text input popup in the Pretendo nav menu with Close and Send buttons
+// @description  Adds a text input popup in the Pretendo community-top container with Close and Send buttons
 // @author       Funtum
 // @match        https://juxt.pretendo.network/*
 // @grant        none
@@ -13,24 +13,29 @@
 (function() {
     'use strict';
 
-    // --- Wait until #nav-menu exists ---
-    function waitForNavMenu(callback) {
-        const nav = document.querySelector('#nav-menu');
-        if (nav) return callback(nav);
+    // --- Wait until .community-info exists ---
+    function waitForCommunityInfo(callback) {
+        const container = document.querySelector('.community-info');
+        if (container) return callback(container);
 
         const observer = new MutationObserver(() => {
-            const navMenu = document.querySelector('#nav-menu');
-            if (navMenu) {
+            const container = document.querySelector('.community-info');
+            if (container) {
                 observer.disconnect();
-                callback(navMenu);
+                callback(container);
             }
         });
         observer.observe(document.body, { childList: true, subtree: true });
     }
 
-    waitForNavMenu((nav) => {
+    waitForCommunityInfo((container) => {
         const btn = document.createElement('button');
         btn.textContent = 'Post';
+        btn.classList.add('favorite-button');
+        Object.assign(btn.style, {
+            fontSize: '16px',
+            padding: '10px 20px',
+        });
 
         // --- Create popup (hidden by default) ---
         const popup = document.createElement('div');
@@ -152,7 +157,7 @@
             popup.style.display = popup.style.display === 'none' ? 'flex' : 'none';
         });
 
-        // --- Add button to nav ---
-        nav.appendChild(btn);
+        // --- Add button to community-top ---
+        container.appendChild(btn);
     });
 })();
