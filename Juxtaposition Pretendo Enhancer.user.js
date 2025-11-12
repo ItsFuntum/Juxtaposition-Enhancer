@@ -13,11 +13,7 @@
 (function() {
     'use strict';
 
-    // Only show the button if we're on a community page
-    const match = window.location.pathname.match(/^\/titles\/(\d+)/);
-    if (!match) return; // Not a /titles/... page, stop here
-
-    const communityId = match[1];
+    const communityPage = window.location.pathname.match(/^\/titles\/(\d+)/);
 
     // --- Wait until .community-info exists ---
     function waitForCommunityInfo(callback) {
@@ -34,86 +30,194 @@
         observer.observe(document.body, { childList: true, subtree: true });
     }
 
-    waitForCommunityInfo((container) => {
-        const btn = document.createElement('button');
-        btn.textContent = 'Post';
-        btn.classList.add('favorite-button');
-        Object.assign(btn.style, {
-            fontSize: '16px',
-            padding: '10px 20px',
-        });
+    if (communityPage) {
+        const communityId = communityPage[1];
+        waitForCommunityInfo((container) => {
+            const btn = document.createElement('button');
+            btn.textContent = 'Post';
+            btn.classList.add('favorite-button');
+            Object.assign(btn.style, {
+                fontSize: '16px',
+                padding: '10px 20px',
+            });
 
-        // --- Create popup (hidden by default) ---
-        const popup = document.createElement('div');
-        Object.assign(popup.style, {
-            position: 'fixed',
-            top: '50%',
-            left: '50%',
-            transform: 'translate(-50%, -50%)',
-            background: '#2a2f50',
-            border: '1px solid #ccc',
-            borderRadius: '8px',
-            boxShadow: '0 4px 12px rgba(0,0,0,0.2)',
-            padding: '20px',
-            zIndex: '10000',
-            display: 'none',
-            flexDirection: 'column',
-            gap: '10px',
-            width: '300px',
-            fontFamily: 'sans-serif',
-        });
+            // --- Create popup (hidden by default) ---
+            const popup = document.createElement('div');
+            Object.assign(popup.style, {
+                position: 'fixed',
+                top: '50%',
+                left: '50%',
+                transform: 'translate(-50%, -50%)',
+                background: '#2a2f50',
+                border: '1px solid #ccc',
+                borderRadius: '8px',
+                boxShadow: '0 4px 12px rgba(0,0,0,0.2)',
+                padding: '20px',
+                zIndex: '10000',
+                display: 'none',
+                flexDirection: 'column',
+                gap: '10px',
+                width: '300px',
+                fontFamily: 'sans-serif',
+            });
 
+            const textarea = document.createElement('textarea');
+            Object.assign(textarea.style, {
+                width: '100%',
+                height: '100px',
+                padding: '8px',
+                resize: 'none',
+                fontSize: '14px',
+                background: '#1b1f3b',
+                color: 'white',
+            });
+
+            // --- Buttons container (Close + Send) ---
+            const buttonRow = document.createElement('div');
+            Object.assign(buttonRow.style, {
+                display: 'flex',
+                justifyContent: 'flex-end',
+                gap: '10px',
+            });
+
+            const closeBtn = document.createElement('button');
+            closeBtn.textContent = 'Close';
+            Object.assign(closeBtn.style, {
+                background: 'black',
+                color: 'white',
+                border: 'none',
+                padding: '8px 12px',
+                borderRadius: '6px',
+                cursor: 'pointer',
+            });
+
+            const sendBtn = document.createElement('button');
+            sendBtn.textContent = 'Send';
+            Object.assign(sendBtn.style, {
+                background: '#4CAF50',
+                color: 'white',
+                border: 'none',
+                padding: '8px 12px',
+                borderRadius: '6px',
+                cursor: 'pointer',
+            });
+            sendBtn.addEventListener('mouseenter', () => sendBtn.style.background = '#45a049');
+            sendBtn.addEventListener('mouseleave', () => sendBtn.style.background = '#4CAF50');
+
+            // --- Button logic ---
+            closeBtn.addEventListener('click', () => popup.style.display = 'none');
+            sendBtn.addEventListener('click', async () => {
+                const text = textarea.value.trim();
+                if (!text) {
+                    alert('Please type something first.');
+                    return;
+                }
+
+                const formData = new FormData();
+                formData.append("community_id", communityId);
+                formData.append("body", text);
+                formData.append("feeling_id", "0");
+                formData.append("is_autopost", "0");
+                formData.append("language_id", "1"); // English
+                formData.append("is_spoiler", "0");
+                formData.append("is_app_jumpable", "0");
+
+                try {
+                    const response = await fetch("/posts/new", {
+                        method: "POST",
+                        body: formData,
+                        credentials: "include"
+                    });
+
+                    const data = await response.text();
+                    console.log("Server response:", data);
+
+                    if (response.ok) {
+                        alert("Post sent successfully!");
+                        textarea.value = '';
+                        popup.style.display = 'none';
+                    } else {
+                        alert("Failed to post. Check console for details.");
+                    }
+                } catch (err) {
+                    console.error("Error sending post:", err);
+                    alert("Error sending post.");
+                }
+            });
+
+            // Add Close first, then Send
+            buttonRow.appendChild(closeBtn);
+            buttonRow.appendChild(sendBtn);
+
+            popup.appendChild(textarea);
+            popup.appendChild(buttonRow);
+            document.body.appendChild(popup);
+
+            // --- Toggle popup ---
+            btn.addEventListener('click', () => {
+                popup.style.display = popup.style.display === 'none' ? 'flex' : 'none';
+            });
+
+            // --- Add button to community-top ---
+            container.appendChild(btn);
+        });
+    }
+    // Observe the document body for changes until we find the wrapper
+    const observer = new MutationObserver((mutations, obs) => {
+        const wrapper = document.querySelector('.community-page-post-box #wrapper');
+        if (!wrapper) return;
+
+        // Once found, stop observing
+        obs.disconnect();
+
+        // Create textarea container
+        const container = document.createElement('div');
+        container.style.width = '40%';
+        container.style.margin = '15px 0';
+        container.style.display = 'flex';
+        container.style.flexDirection = 'column';
+        container.style.gap = '6px';
+        container.style.background = '#2a2f50';
+        container.style.padding = '10px';
+        container.style.borderRadius = '8px';
+        container.style.border = '1px solid #444';
+
+        // Label
+        const label = document.createElement('label');
+        label.textContent = 'Write a reply:';
+        label.style.color = 'white';
+        label.style.fontWeight = '600';
+
+        // Textarea
         const textarea = document.createElement('textarea');
-        Object.assign(textarea.style, {
-            width: '100%',
-            height: '100px',
-            padding: '8px',
-            resize: 'none',
-            fontSize: '14px',
-            background: '#1b1f3b',
-            color: 'white',
-        });
-
-        // --- Buttons container (Close + Send) ---
-        const buttonRow = document.createElement('div');
-        Object.assign(buttonRow.style, {
-            display: 'flex',
-            justifyContent: 'flex-end',
-            gap: '10px',
-        });
-
-        const closeBtn = document.createElement('button');
-        closeBtn.textContent = 'Close';
-        Object.assign(closeBtn.style, {
-            background: 'black',
-            color: 'white',
-            border: 'none',
-            padding: '8px 12px',
-            borderRadius: '6px',
-            cursor: 'pointer',
-        });
+        textarea.placeholder = 'Type your message here...';
+        textarea.rows = 5;
+        textarea.style.width = '100%';
+        textarea.style.padding = '8px';
+        textarea.style.borderRadius = '6px';
+        textarea.style.border = '1px solid #666';
+        textarea.style.background = '#1b1f3b';
+        textarea.style.color = 'white';
+        textarea.style.fontSize = '14px';
+        textarea.style.resize = 'vertical';
 
         const sendBtn = document.createElement('button');
         sendBtn.textContent = 'Send';
-        Object.assign(sendBtn.style, {
-            background: '#4CAF50',
-            color: 'white',
-            border: 'none',
-            padding: '8px 12px',
-            borderRadius: '6px',
-            cursor: 'pointer',
-        });
-        sendBtn.addEventListener('mouseenter', () => sendBtn.style.background = '#45a049');
-        sendBtn.addEventListener('mouseleave', () => sendBtn.style.background = '#4CAF50');
 
-        // --- Button logic ---
-        closeBtn.addEventListener('click', () => popup.style.display = 'none');
         sendBtn.addEventListener('click', async () => {
             const text = textarea.value.trim();
             if (!text) {
                 alert('Please type something first.');
                 return;
             }
+
+            const communityLink = document.querySelector('.post-meta-wrapper h4 a[href^="/titles/"]');
+            if (!communityLink) return alert('Cannot find community link');
+            const communityId = communityLink ? communityLink.href.split('/titles/')[1] : null;
+
+            const postsWrapper = document.querySelector('.posts-wrapper');
+            if (!postsWrapper) return alert('Cannot find parent post ID');
+            const postId = postsWrapper.id; // Use the id attribute as postId
 
             const formData = new FormData();
             formData.append("community_id", communityId);
@@ -125,7 +229,8 @@
             formData.append("is_app_jumpable", "0");
 
             try {
-                const response = await fetch("/posts/new", {
+                const response = await fetch(`/posts/${postId}/new`, {
+
                     method: "POST",
                     body: formData,
                     credentials: "include"
@@ -137,7 +242,6 @@
                 if (response.ok) {
                     alert("Post sent successfully!");
                     textarea.value = '';
-                    popup.style.display = 'none';
                 } else {
                     alert("Failed to post. Check console for details.");
                 }
@@ -147,20 +251,16 @@
             }
         });
 
-        // Add Close first, then Send
-        buttonRow.appendChild(closeBtn);
-        buttonRow.appendChild(sendBtn);
+        // Append to container
+        container.appendChild(label);
+        container.appendChild(textarea);
+        container.appendChild(sendBtn);
 
-        popup.appendChild(textarea);
-        popup.appendChild(buttonRow);
-        document.body.appendChild(popup);
+        // Append to wrapper
+        wrapper.appendChild(container);
 
-        // --- Toggle popup ---
-        btn.addEventListener('click', () => {
-            popup.style.display = popup.style.display === 'none' ? 'flex' : 'none';
-        });
-
-        // --- Add button to community-top ---
-        container.appendChild(btn);
+        console.log('Textarea added successfully!');
     });
+
+    observer.observe(document.body, { childList: true, subtree: true });
 })();
