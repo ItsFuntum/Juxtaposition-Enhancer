@@ -162,47 +162,51 @@
             container.appendChild(btn);
         });
     }
-    // Observe the document body for changes until we find the wrapper
-    const observer = new MutationObserver((mutations, obs) => {
-        const wrapper = document.querySelector('.community-page-post-box #wrapper');
-        if (!wrapper) return;
 
-        // Once found, stop observing
-        obs.disconnect();
+    // --- Instead of starting with just the observer ---
+    async function addReplyBox(wrapper) {
+        console.log('Wrapper found:', wrapper);
 
-        // Create textarea container
         const container = document.createElement('div');
-        container.style.width = '40%';
-        container.style.margin = '15px 0';
-        container.style.display = 'flex';
-        container.style.flexDirection = 'column';
-        container.style.gap = '6px';
-        container.style.background = '#2a2f50';
-        container.style.padding = '10px';
-        container.style.borderRadius = '8px';
-        container.style.border = '1px solid #444';
+        Object.assign(container.style, {
+            width: '40%',
+            margin: '15px 0',
+            display: 'flex',
+            flexDirection: 'column',
+            gap: '6px',
+            background: '#2a2f50',
+            padding: '10px',
+            borderRadius: '8px',
+            border: '1px solid #444',
+        });
 
-        // Label
         const label = document.createElement('label');
         label.textContent = 'Write a reply:';
         label.style.color = 'white';
         label.style.fontWeight = '600';
 
-        // Textarea
         const textarea = document.createElement('textarea');
         textarea.placeholder = 'Type your message here...';
         textarea.rows = 5;
-        textarea.style.width = '100%';
-        textarea.style.padding = '8px';
-        textarea.style.borderRadius = '6px';
-        textarea.style.border = '1px solid #666';
-        textarea.style.background = '#1b1f3b';
-        textarea.style.color = 'white';
-        textarea.style.fontSize = '14px';
-        textarea.style.resize = 'vertical';
+        Object.assign(textarea.style, {
+            width: '100%',
+            padding: '8px',
+            borderRadius: '6px',
+            border: '1px solid #666',
+            background: '#1b1f3b',
+            color: 'white',
+            fontSize: '14px',
+            resize: 'vertical',
+        });
 
         const sendBtn = document.createElement('button');
         sendBtn.textContent = 'Send';
+
+        container.appendChild(label);
+        container.appendChild(textarea);
+        container.appendChild(sendBtn);
+
+        wrapper.appendChild(container);
 
         sendBtn.addEventListener('click', async () => {
             const text = textarea.value.trim();
@@ -228,6 +232,7 @@
             formData.append("is_spoiler", "0");
             formData.append("is_app_jumpable", "0");
 
+
             try {
                 const response = await fetch(`/posts/${postId}/new`, {
 
@@ -250,17 +255,21 @@
                 alert("Error sending post.");
             }
         });
+    }
 
-        // Append to container
-        container.appendChild(label);
-        container.appendChild(textarea);
-        container.appendChild(sendBtn);
-
-        // Append to wrapper
-        wrapper.appendChild(container);
-
-        console.log('Textarea added successfully!');
-    });
-
-    observer.observe(document.body, { childList: true, subtree: true });
+    // --- First, check if wrapper exists now ---
+    let wrapper = document.querySelector('.community-page-post-box #wrapper');
+    if (wrapper) {
+        addReplyBox(wrapper);
+    } else {
+        // Fallback: watch for it to appear later
+        const observer = new MutationObserver((mutations, obs) => {
+            const wrapper = document.querySelector('.community-page-post-box #wrapper');
+            if (wrapper) {
+                obs.disconnect();
+                addReplyBox(wrapper);
+            }
+        });
+        observer.observe(document.body, { childList: true, subtree: true });
+    }
 })();
