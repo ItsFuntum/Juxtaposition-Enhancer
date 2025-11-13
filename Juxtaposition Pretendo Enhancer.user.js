@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         Juxtaposition Pretendo Enhancer
 // @namespace    https://github.com/ItsFuntum/Juxtaposition-Enhancer
-// @version      2025-11-13
+// @version      2025-11-12
 // @description  Adds a text input popup in the Pretendo community-top container with Close and Send buttons
 // @author       Funtum
 // @match        *://juxt.pretendo.network/*
@@ -14,6 +14,7 @@
     'use strict';
 
     const communityPage = window.location.pathname.match(/^\/titles\/(\d+)/);
+    const postsPage = window.location.pathname.match(/posts/);
 
     // --- Wait until .community-info exists ---
     function waitForCommunityInfo(callback) {
@@ -257,19 +258,21 @@
         });
     }
 
-    // --- First, check if wrapper exists now ---
-    let wrapper = document.querySelector('.community-page-post-box #wrapper');
-    if (wrapper) {
-        addReplyBox(wrapper);
-    } else {
-        // Fallback: watch for it to appear later
-        const observer = new MutationObserver((mutations, obs) => {
-            const wrapper = document.querySelector('.community-page-post-box #wrapper');
-            if (wrapper) {
-                obs.disconnect();
-                addReplyBox(wrapper);
-            }
-        });
-        observer.observe(document.body, { childList: true, subtree: true });
+    if (postsPage) {
+        // --- First, check if wrapper exists now ---
+        let wrapper = document.querySelector('.community-page-post-box #wrapper');
+        if (wrapper) {
+            addReplyBox(wrapper);
+        } else {
+            // Fallback: watch for it to appear later
+            const observer = new MutationObserver((mutations, obs) => {
+                const wrapper = document.querySelector('.community-page-post-box #wrapper');
+                if (wrapper) {
+                    obs.disconnect();
+                    addReplyBox(wrapper);
+                }
+            });
+            observer.observe(document.body, { childList: true, subtree: true });
+        }
     }
 })();
