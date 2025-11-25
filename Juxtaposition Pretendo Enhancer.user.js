@@ -271,16 +271,19 @@
 
     wrappers.forEach((wrapper) => {
       const postsWrapper = wrapper.closest(".posts-wrapper");
+      const postId = postsWrapper.id;
       const postMiiIcon_raw = postsWrapper.querySelector(".user-icon ").src;
       const postMiiIcon_base = postMiiIcon_raw.substring(0, postMiiIcon_raw.lastIndexOf("/") + 1)
 
+      // Check if the post was made by the current user
       if (postMiiIcon_base != userMiiIcon_base) return;
+
+      const empathyCount = postsWrapper.querySelector("h4[id^='count-']").textContent;
+      if (empathyCount <= 0) return;
 
       if (wrapper.querySelector(".view-likers-btn")) return;
 
       if (!postsWrapper) return console.warn("Cannot find parent post ID");
-
-      const postId = postsWrapper.id;
 
       const btn = document.createElement("button");
       btn.textContent = "❤️ View Likers";
