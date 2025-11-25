@@ -267,18 +267,25 @@
   function addViewLikes() {
     const wrappers = document.querySelectorAll(".post-buttons-wrapper");
     const userMiiIcon_raw = document.querySelector(".mii-icon").src;
-    const userMiiIcon_base = userMiiIcon_raw.substring(0, userMiiIcon_raw.lastIndexOf("/") + 1)
+    const userMiiIcon_base = userMiiIcon_raw.substring(
+      0,
+      userMiiIcon_raw.lastIndexOf("/") + 1
+    );
 
     wrappers.forEach((wrapper) => {
       const postsWrapper = wrapper.closest(".posts-wrapper");
       const postId = postsWrapper.id;
       const postMiiIcon_raw = postsWrapper.querySelector(".user-icon ").src;
-      const postMiiIcon_base = postMiiIcon_raw.substring(0, postMiiIcon_raw.lastIndexOf("/") + 1)
+      const postMiiIcon_base = postMiiIcon_raw.substring(
+        0,
+        postMiiIcon_raw.lastIndexOf("/") + 1
+      );
 
       // Check if the post was made by the current user
       if (postMiiIcon_base != userMiiIcon_base) return;
 
-      const empathyCount = postsWrapper.querySelector("h4[id^='count-']").textContent;
+      const empathyCount =
+        postsWrapper.querySelector("h4[id^='count-']").textContent;
       if (empathyCount <= 0) return;
 
       if (wrapper.querySelector(".view-likers-btn")) return;
@@ -312,10 +319,19 @@
         credentials: "include",
       });
 
-      const localData = await res.json(); // now it's valid JSON
-      const postData = localData.posts.find((post) => post.id.toString() === postId);
-      return postData.yeahs || [];
+      const localData = await res.json();
 
+      // Find the post by postId
+      const postData = localData.posts.find(
+        (post) => post.id.toString() === postId
+      );
+      if (!postData) return [];
+
+      // Return an array of objects with id and Mii URL
+      return postData.yeahs.map((pid) => ({
+        id: pid,
+        miiUrl: `https://r2-cdn.pretendo.cc/mii/${pid}/normal_face.png`
+      }));
     } catch (err) {
       console.error("Error fetching likers:", err);
       return [];
@@ -323,10 +339,10 @@
   }
 
   async function showYeahsPopup(postId) {
-    const yeahsID = await fetchYeahsID(postId);
+    const likers = await fetchYeahsID(postId); // now contains [{id, miiUrl}, ...]
+    if (!likers.length) return alert("No likes yet.");
 
     const popup = document.createElement("div");
-    popup.id = "likers-popup";
     Object.assign(popup.style, {
       position: "fixed",
       top: "50%",
@@ -338,23 +354,40 @@
       border: "1px solid #444",
       zIndex: "99999",
       color: "white",
-      width: "280px",
-      maxHeight: "300px",
+      width: "300px",
+      maxHeight: "400px",
       overflowY: "auto",
       fontFamily: "sans-serif",
+      display: "flex",
+      flexDirection: "column",
+      gap: "10px",
     });
 
     const title = document.createElement("h3");
     title.textContent = "❤️ Liked by:";
     title.style.marginTop = "0";
+    popup.appendChild(title);
 
-    const list = document.createElement("ul");
-    list.style.paddingLeft = "20px";
-    yeahsID.forEach((id) => {
-      const li = document.createElement("li");
-      li.textContent = id;
-      list.appendChild(li);
+    const likersContainer = document.createElement("div");
+    Object.assign(likersContainer.style, {
+      display: "flex",
+      flexWrap: "wrap",
+      gap: "10px",
     });
+
+    likers.forEach(({ miiUrl }) => {
+      const miiImg = document.createElement("img");
+      miiImg.src = miiUrl; // use the URL directly
+      Object.assign(miiImg.style, {
+        width: "50px",
+        height: "50px",
+        borderRadius: "50%",
+        border: "1px solid #444",
+      });
+      likersContainer.appendChild(miiImg);
+    });
+
+    popup.appendChild(likersContainer);
 
     const close = document.createElement("button");
     close.textContent = "Close";
@@ -368,10 +401,8 @@
       color: "white",
     });
     close.onclick = () => popup.remove();
-
-    popup.appendChild(title);
-    popup.appendChild(list);
     popup.appendChild(close);
+
     document.body.appendChild(popup);
   }
 
