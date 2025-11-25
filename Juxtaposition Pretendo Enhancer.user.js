@@ -172,8 +172,6 @@
 
   // --- Instead of starting with just the observer ---
   async function addReplyBox(wrapper) {
-    console.log("Wrapper found:", wrapper);
-
     const container = document.createElement("div");
     Object.assign(container.style, {
       width: "40%",
@@ -267,21 +265,22 @@
   }
 
   function addViewLikes() {
-    console.log("[Likers] Scanning for post buttons...");
-
     const wrappers = document.querySelectorAll(".post-buttons-wrapper");
-    console.log(
-      `[Likers] Found ${wrappers.length} post-buttons-wrapper elements`
-    );
+    const userMiiIcon_raw = document.querySelector(".mii-icon").src;
+    const userMiiIcon_base = userMiiIcon_raw.substring(0, userMiiIcon_raw.lastIndexOf("/") + 1)
 
     wrappers.forEach((wrapper) => {
+      const postsWrapper = wrapper.closest(".posts-wrapper");
+      const postMiiIcon_raw = postsWrapper.querySelector(".user-icon ").src;
+      const postMiiIcon_base = postMiiIcon_raw.substring(0, postMiiIcon_raw.lastIndexOf("/") + 1)
+
+      if (postMiiIcon_base != userMiiIcon_base) return;
+
       if (wrapper.querySelector(".view-likers-btn")) return;
 
-      const postsWrapper = wrapper.closest(".posts-wrapper");
       if (!postsWrapper) return console.warn("Cannot find parent post ID");
 
       const postId = postsWrapper.id;
-      console.log(`[Likers] Adding button to post: ${postId}`);
 
       const btn = document.createElement("button");
       btn.textContent = "❤️ View Likers";
@@ -299,32 +298,29 @@
 
       wrapper.insertBefore(btn, wrapper.firstChild);
 
-      btn.addEventListener("click", () => showLikersPopupFromServer(postId));
+      btn.addEventListener("click", () => showYeahsPopup(postId));
     });
   }
 
-  async function fetchLikersFromServer(postId) {
+  async function fetchYeahsID(postId) {
     try {
-      const res = await fetch(`/posts/${postId}.json`, {
+      const res = await fetch(`/users/downloadUserData.json`, {
+        method: "GET",
         credentials: "include",
       });
-      if (!res.ok) throw new Error(`Failed to fetch post ${postId}`);
 
-      const postData = await res.json(); // now it's valid JSON
+      const localData = await res.json(); // now it's valid JSON
+      const postData = localData.posts.find((post) => post.id.toString() === postId);
       return postData.yeahs || [];
+
     } catch (err) {
       console.error("Error fetching likers:", err);
       return [];
     }
   }
 
-  async function showLikersPopupFromServer(postId) {
-    const users = await fetchLikersFromServer(postId);
-
-    if (!users.length) {
-      alert("No likers found.");
-      return;
-    }
+  async function showYeahsPopup(postId) {
+    const yeahsID = await fetchYeahsID(postId);
 
     const popup = document.createElement("div");
     popup.id = "likers-popup";
@@ -333,7 +329,7 @@
       top: "50%",
       left: "50%",
       transform: "translate(-50%, -50%)",
-      background: "#2a2f50",
+      background: "#171717ff",
       padding: "20px",
       borderRadius: "10px",
       border: "1px solid #444",
@@ -351,9 +347,9 @@
 
     const list = document.createElement("ul");
     list.style.paddingLeft = "20px";
-    users.forEach((id) => {
+    yeahsID.forEach((id) => {
       const li = document.createElement("li");
-      li.textContent = id; // Optionally fetch username if you want
+      li.textContent = id;
       list.appendChild(li);
     });
 
@@ -379,7 +375,7 @@
   if (postsPage) {
     const applyEnhancements = () => {
       addReplyBoxIfNeeded();
-      addViewLikes(); // <-- FIXED
+      addViewLikes();
     };
 
     function addReplyBoxIfNeeded() {
