@@ -10,5 +10,6 @@ You need a userscript manager, I recommend [Tampermonkey](https://www.tampermonk
 
 ## Features
 Currently it allows you to:
-* Create community posts from the web UI
-* Reply to community posts from the web UI
+* Create community posts
+* Reply to community posts
+* View who yeah'd *your* post
