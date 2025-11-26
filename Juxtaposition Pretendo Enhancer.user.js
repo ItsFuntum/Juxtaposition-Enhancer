@@ -416,28 +416,99 @@
     document.body.appendChild(popup);
   }
 
+  function addDeleteButton() {
+    const posts = document.querySelectorAll(".posts-wrapper");
+
+    posts.forEach((post) => {
+      const mii = post.querySelector(".user-icon")?.src;
+      const myMii = document.querySelector(".mii-icon")?.src;
+
+      // Only show delete button for your own posts
+      if (
+        !mii ||
+        !myMii ||
+        mii.substring(0, mii.lastIndexOf("/")) !==
+          myMii.substring(0, myMii.lastIndexOf("/"))
+      ) {
+        return;
+      }
+
+      const menu = post.querySelector(".post-hamburger");
+      if (!menu) return;
+
+      // Prevent duplicates
+      if (menu.querySelector(".delete-post-button")) return;
+
+      const postId = post.id;
+
+      const deleteBtn = document.createElement("li");
+      deleteBtn.classList.add("delete-post-button");
+      deleteBtn.setAttribute("role", "menuitem");
+      deleteBtn.dataset.action = "delete";
+      deleteBtn.innerHTML = `
+      <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="#ffffff" viewBox="0 0 256 256">
+        <path stroke="currentColor" stroke-width="4" d="M216 48H40l12 176a12 12 0 0 0 12 12h128a12 12 0 0 0 12-12l12-176ZM96 24h64l4 24H92l4-24Zm24 56v112m40-112v112"/>
+      </svg>
+      Delete Post
+    `;
+
+      deleteBtn.addEventListener("click", async () => {
+        const confirmDelete = confirm(
+          "Are you sure you want to delete this post?"
+        );
+        if (!confirmDelete) return;
+
+        try {
+          const res = await fetch(`/posts/${postId}`, {
+            method: "DELETE",
+            credentials: "include",
+          });
+
+          if (res.ok) {
+            post.remove();
+          } else {
+            alert("Failed to delete post.");
+          }
+        } catch (err) {
+          console.error("Delete error:", err);
+          alert("Error deleting post.");
+        }
+      });
+
+      menu.appendChild(deleteBtn);
+    });
+  }
+
+  let applyEnhancements;
+
   if (postsPage) {
-    const applyEnhancements = () => {
+    applyEnhancements = () => {
       addReplyBoxIfNeeded();
       addViewLikes();
+      addDeleteButton();
     };
 
     function addReplyBoxIfNeeded() {
       let wrapper = document.querySelector(".community-page-post-box #wrapper");
       if (wrapper && !wrapper.dataset.replybox) {
-        wrapper.dataset.replybox = "1"; // prevent duplicates
+        wrapper.dataset.replybox = "1";
         addReplyBox(wrapper);
       }
     }
-
-    // Run immediately for already-loaded content
-    applyEnhancements();
-
-    // Observe future PJAX loads
-    const observer = new MutationObserver(() => {
-      applyEnhancements();
-    });
-
-    observer.observe(document.body, { childList: true, subtree: true });
+  } else {
+    applyEnhancements = () => {
+      addViewLikes();
+      addDeleteButton();
+    };
   }
+
+  // Run immediately for already-loaded content
+  applyEnhancements();
+
+  // Observe future PJAX loads
+  const observer = new MutationObserver(() => {
+    applyEnhancements();
+  });
+
+  observer.observe(document.body, { childList: true, subtree: true });
 })();
