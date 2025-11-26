@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         Juxtaposition Pretendo Enhancer
 // @namespace    https://github.com/ItsFuntum/Juxtaposition-Enhancer
-// @version      2025-11-25
+// @version      2025-11-26
 // @description  Adds a text input popup in the Pretendo community-top container with Close and Send buttons
 // @author       Funtum
 // @match        *://juxt.pretendo.network/*
@@ -375,16 +375,23 @@
       gap: "10px",
     });
 
-    likers.forEach(({ miiUrl }) => {
+    likers.forEach(({ id, miiUrl }) => {
       const miiImg = document.createElement("img");
       miiImg.src = miiUrl; // use the URL directly
+
+      const link = document.createElement("a");
+      link.href = `/users/${id}`;
+      link.target = "_blank"; // Open in new tab
+
       Object.assign(miiImg.style, {
         width: "50px",
         height: "50px",
         borderRadius: "50%",
         border: "1px solid #444",
       });
-      likersContainer.appendChild(miiImg);
+
+      link.appendChild(miiImg);
+      likersContainer.appendChild(link);
     });
 
     popup.appendChild(likersContainer);
