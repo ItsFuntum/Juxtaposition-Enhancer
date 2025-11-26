@@ -330,7 +330,7 @@
       // Return an array of objects with id and Mii URL
       return postData.yeahs.map((pid) => ({
         id: pid,
-        miiUrl: `https://r2-cdn.pretendo.cc/mii/${pid}/normal_face.png`
+        miiUrl: `https://r2-cdn.pretendo.cc/mii/${pid}/normal_face.png`,
       }));
     } catch (err) {
       console.error("Error fetching likers:", err);
@@ -376,19 +376,23 @@
     });
 
     likers.forEach(({ id, miiUrl }) => {
-      const miiImg = document.createElement("img");
-      miiImg.src = miiUrl; // use the URL directly
-
       const link = document.createElement("a");
       link.href = `/users/${id}`;
       link.target = "_blank"; // Open in new tab
+
+      const miiImg = document.createElement("img");
+      miiImg.src = miiUrl;
 
       Object.assign(miiImg.style, {
         width: "50px",
         height: "50px",
         borderRadius: "50%",
         border: "1px solid #444",
+        cursor: "pointer",
       });
+
+      // Optional tooltip
+      miiImg.title = `User ID: ${id}`;
 
       link.appendChild(miiImg);
       likersContainer.appendChild(link);
