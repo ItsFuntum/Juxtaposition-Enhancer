@@ -10,7 +10,7 @@ You will need a userscript manager, I recommend [Tampermonkey](https://www.tampe
 
 ## Features
 Currently it allows you to:
-* Create posts
+* Create posts (Tip: Click on a community to post!)
 * Reply to posts
-* Delete posts
-* View who yeah'd a post (only works on posts you made)
+* Delete your own posts
+* View who yeah'd a post (only works on your own posts)
