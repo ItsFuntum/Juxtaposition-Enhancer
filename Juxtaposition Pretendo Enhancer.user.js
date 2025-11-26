@@ -391,7 +391,6 @@
         cursor: "pointer",
       });
 
-      // Optional tooltip
       miiImg.title = `User ID: ${id}`;
 
       link.appendChild(miiImg);
