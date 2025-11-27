@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         Juxtaposition Pretendo Enhancer
 // @namespace    https://github.com/ItsFuntum/Juxtaposition-Enhancer
-// @version      2025-11-26
+// @version      2025-11-27
 // @description  Adds a text input popup in the Pretendo community-top container with Close and Send buttons
 // @author       Funtum
 // @match        *://juxt.pretendo.network/*
