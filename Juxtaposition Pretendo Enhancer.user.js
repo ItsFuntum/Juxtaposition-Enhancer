@@ -447,8 +447,25 @@
       deleteBtn.setAttribute("role", "menuitem");
       deleteBtn.dataset.action = "delete";
       Object.assign(deleteBtn.style, {
-        background: "#ff0000ff",
+        background: "#b30000",
+        color: "white",
+        padding: "10px",
+        borderRadius: "6px",
+        display: "flex",
+        alignItems: "center",
+        gap: "8px",
+        cursor: "pointer",
+        fontWeight: "600",
       });
+
+      deleteBtn.addEventListener("mouseenter", () => {
+        deleteBtn.style.background = "#ff0000";
+      });
+
+      deleteBtn.addEventListener("mouseleave", () => {
+        deleteBtn.style.background = "#b30000";
+      });
+
       deleteBtn.innerHTML = `
       <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="#ffffff" viewBox="0 0 256 256">
         <path stroke="currentColor" stroke-width="4" d="M216 48H40l12 176a12 12 0 0 0 12 12h128a12 12 0 0 0 12-12l12-176ZM96 24h64l4 24H92l4-24Zm24 56v112m40-112v112"/>
