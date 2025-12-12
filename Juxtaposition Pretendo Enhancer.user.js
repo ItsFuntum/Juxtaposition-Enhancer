@@ -1,8 +1,8 @@
 // ==UserScript==
 // @name         Juxtaposition Pretendo Enhancer
 // @namespace    https://github.com/ItsFuntum/Juxtaposition-Enhancer
-// @version      2025-11-27
-// @description  Adds a text input popup in the Pretendo community-top container with Close and Send buttons
+// @version      2025-12-12
+// @description  Userscript that improves Pretendo's Juxtaposition on the web.
 // @author       Funtum
 // @match        *://juxt.pretendo.network/*
 // @grant        none
@@ -16,6 +16,8 @@
 
   const communityPage = window.location.pathname.match(/^\/titles\/(\d+)/);
   const postsPage = window.location.pathname.match(/posts/);
+  const myMii = document.querySelector(".mii-icon")?.src;
+  const myMiiSubstring = myMii.substring(0, myMii.lastIndexOf("/"));
 
   // --- Wait until .community-info exists ---
   function waitForCommunityInfo(callback) {
@@ -34,140 +36,78 @@
 
   if (communityPage) {
     const communityId = communityPage[1];
-    waitForCommunityInfo((container) => {
-      const btn = document.createElement("button");
-      btn.textContent = "Post";
-      btn.classList.add("favorite-button");
-      Object.assign(btn.style, {
-        fontSize: "16px",
-        padding: "10px 20px",
-      });
+    waitForCommunityInfo(() => {
+      const popupBackdrop = document.createElement("div");
+      popupBackdrop.className = "modal-backdrop";
+      popupBackdrop.style.display = "flex";
+      document.body.appendChild(popupBackdrop);
 
-      // --- Create popup (hidden by default) ---
       const popup = document.createElement("div");
-      Object.assign(popup.style, {
-        position: "fixed",
-        top: "50%",
-        left: "50%",
-        transform: "translate(-50%, -50%)",
-        background: "#2a2f50",
-        border: "1px solid #ccc",
-        borderRadius: "8px",
-        boxShadow: "0 4px 12px rgba(0,0,0,0.2)",
-        padding: "20px",
-        zIndex: "10000",
-        display: "none",
-        flexDirection: "column",
-        gap: "10px",
-        width: "300px",
-        fontFamily: "sans-serif",
+      popup.id = "add-post-page";
+      popup.className = "add-post-page official-user-post";
+      popup.style.display = "flex";
+
+      popup.innerHTML = `
+<form id="posts-form" data-is-own-title="1" data-is-identified="1" action="/posts/new" method="post">
+  <input type="hidden" name="community_id" value="${communityId}">
+
+  <div class="add-post-page-content">
+
+    <div class="feeling-selector expression">
+      <img src="${myMiiSubstring}/normal_face.png" id="mii-face" class="icon">
+      <ul class="buttons">
+        <li><input type="radio" class="feeling-button-normal" data-mii-face-url="${myMiiSubstring}/normal_face.png" name="feeling_id" value="0" checked></li>
+        <li><input type="radio" class="feeling-button-happy" data-mii-face-url="${myMiiSubstring}/smile_open_mouth.png" name="feeling_id" value="1"></li>
+        <li><input type="radio" class="feeling-button-like" data-mii-face-url="${myMiiSubstring}/wink_left.png" name="feeling_id" value="2"></li>
+        <li><input type="radio" class="feeling-button-surprised" data-mii-face-url="${myMiiSubstring}/surprise_open_mouth.png" name="feeling_id" value="3"></li>
+        <li><input type="radio" class="feeling-button-frustrated" data-mii-face-url="${myMiiSubstring}/frustrated.png" name="feeling_id" value="4"></li>
+        <li><input type="radio" class="feeling-button-puzzled" data-mii-face-url="${myMiiSubstring}/sorrow.png" name="feeling_id" value="5"></li>
+      </ul>
+    </div>
+
+    <div class="textarea-container textarea-with-menu active-text">
+      <menu class="textarea-menu">
+        <li class="textarea-menu-text">
+          <input type="radio" name="_post_type" checked value="body">
+        </li>
+        <li class="textarea-menu-memo">
+          <input type="radio" name="_post_type" value="painting">
+        </li>
+      </menu>
+
+      <textarea id="new-post-text" name="body" class="textarea-text" maxlength="280" placeholder="Enter text here..."></textarea>
+
+      <div id="new-post-memo" class="textarea-memo" style="display:none">
+        <img id="memo" class="textarea-memo-preview">
+        <input id="memo-value" type="hidden" name="painting">
+      </div>
+    </div>
+
+    <label class="checkbox-container spoiler-button">
+      Spoilers
+      <input type="checkbox" id="spoiler" name="spoiler" value="true">
+      <span class="checkmark"></span>
+    </label>
+  </div>
+
+  <div id="button-wrapper">
+    <input type="submit" class="post-button fixed-bottom-button" value="Post">
+  </div>
+</form>
+`;
+
+      document.querySelector(".community-top").appendChild(popup);
+
+      // --- Feeling selector: change Mii expression when clicking buttons ---
+      const miiFace = popup.querySelector("#mii-face");
+      const feelingButtons = popup.querySelectorAll("input[name='feeling_id']");
+
+      feelingButtons.forEach((btn) => {
+        btn.addEventListener("change", () => {
+          const url = btn.dataset.miiFaceUrl;
+          if (url) miiFace.src = url;
+        });
       });
-
-      const textarea = document.createElement("textarea");
-      Object.assign(textarea.style, {
-        width: "100%",
-        height: "100px",
-        padding: "8px",
-        resize: "none",
-        fontSize: "14px",
-        background: "#1b1f3b",
-        color: "white",
-      });
-
-      // --- Buttons container (Close + Send) ---
-      const buttonRow = document.createElement("div");
-      Object.assign(buttonRow.style, {
-        display: "flex",
-        justifyContent: "flex-end",
-        gap: "10px",
-      });
-
-      const closeBtn = document.createElement("button");
-      closeBtn.textContent = "Close";
-      Object.assign(closeBtn.style, {
-        background: "black",
-        color: "white",
-        border: "none",
-        padding: "8px 12px",
-        borderRadius: "6px",
-        cursor: "pointer",
-      });
-
-      const sendBtn = document.createElement("button");
-      sendBtn.textContent = "Send";
-      Object.assign(sendBtn.style, {
-        background: "#4CAF50",
-        color: "white",
-        border: "none",
-        padding: "8px 12px",
-        borderRadius: "6px",
-        cursor: "pointer",
-      });
-      sendBtn.addEventListener(
-        "mouseenter",
-        () => (sendBtn.style.background = "#45a049")
-      );
-      sendBtn.addEventListener(
-        "mouseleave",
-        () => (sendBtn.style.background = "#4CAF50")
-      );
-
-      // --- Button logic ---
-      closeBtn.addEventListener("click", () => (popup.style.display = "none"));
-      sendBtn.addEventListener("click", async () => {
-        const text = textarea.value.trim();
-        if (!text) {
-          alert("Please type something first.");
-          return;
-        }
-
-        const formData = new FormData();
-        formData.append("community_id", communityId);
-        formData.append("body", text);
-        formData.append("feeling_id", "0");
-        formData.append("is_autopost", "0");
-        formData.append("language_id", "1"); // English
-        formData.append("is_spoiler", "0");
-        formData.append("is_app_jumpable", "0");
-
-        try {
-          const response = await fetch("/posts/new", {
-            method: "POST",
-            body: formData,
-            credentials: "include",
-          });
-
-          const data = await response.text();
-          console.log("Server response:", data);
-
-          if (response.ok) {
-            alert("Post sent successfully!");
-            textarea.value = "";
-            popup.style.display = "none";
-          } else {
-            alert("Failed to post. Check console for details.");
-          }
-        } catch (err) {
-          console.error("Error sending post:", err);
-          alert("Error sending post.");
-        }
-      });
-
-      // Add Close first, then Send
-      buttonRow.appendChild(closeBtn);
-      buttonRow.appendChild(sendBtn);
-
-      popup.appendChild(textarea);
-      popup.appendChild(buttonRow);
-      document.body.appendChild(popup);
-
-      // --- Toggle popup ---
-      btn.addEventListener("click", () => {
-        popup.style.display = popup.style.display === "none" ? "flex" : "none";
-      });
-
-      // --- Add button to community-top ---
-      container.appendChild(btn);
     });
   }
 
@@ -422,14 +362,14 @@
 
     posts.forEach((post) => {
       const mii = post.querySelector(".user-icon")?.src;
-      const myMii = document.querySelector(".mii-icon")?.src;
+      const miiSubstring = mii.substring(0, mii.lastIndexOf("/"))
 
       // Only show delete button for your own posts
       if (
         !mii ||
         !myMii ||
-        mii.substring(0, mii.lastIndexOf("/")) !==
-          myMii.substring(0, myMii.lastIndexOf("/"))
+        miiSubstring !==
+          myMiiSubstring
       ) {
         return;
       }
