@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         Juxtaposition Pretendo Enhancer
 // @namespace    https://github.com/ItsFuntum/Juxtaposition-Enhancer
-// @version      2025-12-12
+// @version      2025-12-21
 // @description  Userscript that improves Pretendo's Juxtaposition on the web.
 // @author       Funtum
 // @match        *://juxt.pretendo.network/*
@@ -357,96 +357,12 @@
     document.body.appendChild(popup);
   }
 
-  function addDeleteButton() {
-    const posts = document.querySelectorAll(".posts-wrapper");
-
-    posts.forEach((post) => {
-      const mii = post.querySelector(".user-icon")?.src;
-      const miiSubstring = mii.substring(0, mii.lastIndexOf("/"))
-
-      // Only show delete button for your own posts
-      if (
-        !mii ||
-        !myMii ||
-        miiSubstring !==
-          myMiiSubstring
-      ) {
-        return;
-      }
-
-      const menu = post.querySelector(".post-hamburger");
-      if (!menu) return;
-
-      // Prevent duplicates
-      if (menu.querySelector(".delete-post-button")) return;
-
-      const postId = post.id;
-
-      const deleteBtn = document.createElement("li");
-      deleteBtn.classList.add("delete-post-button");
-      deleteBtn.setAttribute("role", "menuitem");
-      deleteBtn.dataset.action = "delete";
-      Object.assign(deleteBtn.style, {
-        background: "#b30000",
-        color: "white",
-        padding: "10px",
-        borderRadius: "6px",
-        display: "flex",
-        alignItems: "center",
-        gap: "8px",
-        cursor: "pointer",
-        fontWeight: "600",
-      });
-
-      deleteBtn.addEventListener("mouseenter", () => {
-        deleteBtn.style.background = "#ff0000";
-      });
-
-      deleteBtn.addEventListener("mouseleave", () => {
-        deleteBtn.style.background = "#b30000";
-      });
-
-      deleteBtn.innerHTML = `
-      <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="#ffffff" viewBox="0 0 256 256">
-        <path stroke="currentColor" stroke-width="4" d="M216 48H40l12 176a12 12 0 0 0 12 12h128a12 12 0 0 0 12-12l12-176ZM96 24h64l4 24H92l4-24Zm24 56v112m40-112v112"/>
-      </svg>
-      Delete Post
-    `;
-
-      deleteBtn.addEventListener("click", async () => {
-        const confirmDelete = confirm(
-          "Are you sure you want to delete this post?"
-        );
-        if (!confirmDelete) return;
-
-        try {
-          const res = await fetch(`/posts/${postId}`, {
-            method: "DELETE",
-            credentials: "include",
-          });
-
-          if (res.ok) {
-            post.remove();
-          } else {
-            alert("Failed to delete post.");
-          }
-        } catch (err) {
-          console.error("Delete error:", err);
-          alert("Error deleting post.");
-        }
-      });
-
-      menu.appendChild(deleteBtn);
-    });
-  }
-
   let applyEnhancements;
 
   if (postsPage) {
     applyEnhancements = () => {
       addReplyBoxIfNeeded();
       addViewLikes();
-      addDeleteButton();
     };
 
     function addReplyBoxIfNeeded() {
@@ -459,7 +375,6 @@
   } else {
     applyEnhancements = () => {
       addViewLikes();
-      addDeleteButton();
     };
   }
 
