@@ -12,4 +12,4 @@ Currently it allows you to:
 ## Installation
 You will need a userscript manager, I recommend [Tampermonkey](https://www.tampermonkey.net).
 
-[Click me to install](https://github.com/ItsFuntum/Juxtaposition-Enhancer/raw/refs/heads/main/Juxtaposition%20Pretendo%20Enhancer.user.js)
+Install from [GitHub](https://github.com/ItsFuntum/Juxtaposition-Enhancer/raw/refs/heads/main/Juxtaposition%20Pretendo%20Enhancer.user.js) or [Greasy Fork](https://greasyfork.org/en/scripts/559732-juxtaposition-pretendo-enhancer)
