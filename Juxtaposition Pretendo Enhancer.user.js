@@ -6,8 +6,7 @@
 // @author       Funtum
 // @match        *://juxt.pretendo.network/*
 // @grant        none
-// @updateURL    https://github.com/ItsFuntum/Juxtaposition-Enhancer/raw/refs/heads/main/Juxtaposition%20Pretendo%20Enhancer.user.js
-// @downloadURL  https://github.com/ItsFuntum/Juxtaposition-Enhancer/raw/refs/heads/main/Juxtaposition%20Pretendo%20Enhancer.user.js
+// @license      MIT
 // @icon         https://juxt.pretendo.network/web/icons/icon-512x512.png
 // ==/UserScript==
 
