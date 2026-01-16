@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         Juxtaposition Pretendo Enhancer
 // @namespace    https://github.com/ItsFuntum/Juxtaposition-Enhancer
-// @version      2026-01-12
+// @version      2026-01-16
 // @description  Userscript that improves Pretendo's Juxtaposition on the web.
 // @author       Funtum
 // @match        *://juxt.pretendo.network/*
@@ -33,6 +33,65 @@
       }
     });
     observer.observe(document.body, { childList: true, subtree: true });
+  }
+
+  function processScreenshot(popup) {
+    const screenshotValue = popup.querySelector("#screenshot-value");
+    const preview = popup.querySelector("#screenshot-preview");
+    const fileInput = popup.querySelector("#screenshot-input");
+
+    fileInput.addEventListener("change", () => {
+      const file = fileInput.files[0];
+      if (!file) return;
+
+      if (file.type !== "image/jpeg") {
+        alert("Only JPEG screenshots are supported.");
+        fileInput.value = "";
+        return;
+      }
+
+      const reader = new FileReader();
+
+      reader.onload = () => {
+        const dataUrl = reader.result.toString();
+
+        const img = new Image();
+        img.onload = () => {
+          const valid = [
+            [800, 450],
+            [400, 240],
+            [320, 240],
+            [640, 480],
+          ].some(([w, h]) => img.width === w && img.height === h);
+
+          if (!valid) {
+            alert(
+              "Invalid screenshot resolution.\n" +
+                "Allowed: 800×450, 400×240, 320×240, 640×480"
+            );
+            fileInput.value = "";
+            return;
+          }
+
+          // Strip data URL prefix (server expects raw base64)
+          const base64 = dataUrl.replace(/^data:image\/jpeg;base64,/, "");
+
+          screenshotValue.value = base64;
+
+          // Preview the image
+          preview.src = dataUrl;
+          preview.style.display = "block";
+
+          // Prevent uploading both screenshot AND memo (painting/drawing)
+          const memoValue = popup.querySelector("#memo-value");
+          if (memoValue) memoValue.value = "";
+        };
+
+        img.src = dataUrl;
+      };
+
+      reader.readAsDataURL(file);
+    });
   }
 
   if (communityPage) {
@@ -91,6 +150,12 @@
     </label>
   </div>
 
+  <div class="screenshot-upload">
+    <input type="file" id="screenshot-input" accept="image/jpeg">
+    <input type="hidden" name="screenshot" id="screenshot-value">
+    <img id="screenshot-preview" style="display:none; max-width:100%; border-radius:6px;">
+  </div>
+
   <div id="button-wrapper">
     <input type="submit" class="post-button fixed-bottom-button" value="Post">
   </div>
@@ -98,6 +163,7 @@
 `;
 
       document.querySelector(".community-top").appendChild(popup);
+      processScreenshot(popup);
 
       // --- Feeling selector: change Mii expression when clicking buttons ---
       const miiFace = popup.querySelector("#mii-face");
@@ -178,6 +244,12 @@
     </label>
   </div>
 
+  <div class="screenshot-upload">
+    <input type="file" id="screenshot-input" accept="image/jpeg">
+    <input type="hidden" name="screenshot" id="screenshot-value">
+    <img id="screenshot-preview" style="display:none; max-width:100%; border-radius:6px;">
+  </div>
+
   <div id="button-wrapper">
     <input type="submit" class="post-button fixed-bottom-button" value="Reply">
   </div>
@@ -185,6 +257,7 @@
 `;
 
     postsWrapper.appendChild(popup);
+    processScreenshot(popup);
 
     // --- Feeling selector: change Mii expression when clicking buttons ---
     const miiFace = popup.querySelector("#mii-face");
@@ -200,7 +273,10 @@
 
   function addViewLikes() {
     const wrappers = document.querySelectorAll(".post-buttons-wrapper");
-    const userMiiIcon_raw = document.querySelector(".mii-icon").src;
+    const userMiiIconEl = document.querySelector(".mii-icon");
+    if (!userMiiIconEl) return;
+
+    const userMiiIcon_raw = userMiiIconEl.src;
     const userMiiIcon_base = userMiiIcon_raw.substring(
       0,
       userMiiIcon_raw.lastIndexOf("/") + 1
@@ -209,7 +285,9 @@
     wrappers.forEach((wrapper) => {
       const postsWrapper = wrapper.closest(".posts-wrapper");
       const postId = postsWrapper.id;
-      const postMiiIcon_raw = postsWrapper.querySelector(".user-icon ").src;
+      const postMiiIcon_raw = postsWrapper.querySelector(".user-icon")?.src;
+      if (!postMiiIcon_raw) return;
+
       const postMiiIcon_base = postMiiIcon_raw.substring(
         0,
         postMiiIcon_raw.lastIndexOf("/") + 1
