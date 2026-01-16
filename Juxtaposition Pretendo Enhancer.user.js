@@ -35,6 +35,52 @@
     observer.observe(document.body, { childList: true, subtree: true });
   }
 
+  function scaleToJuxtResolution(img) {
+    const TARGETS = [
+      { w: 800, h: 450 },
+      { w: 400, h: 240 },
+      { w: 320, h: 240 },
+      { w: 640, h: 480 },
+    ];
+
+    const srcAspect = img.width / img.height;
+
+    // Pick closest aspect ratio
+    let target = TARGETS.reduce(
+      (best, t) => {
+        const diff = Math.abs(srcAspect - t.w / t.h);
+        return diff < best.diff ? { t, diff } : best;
+      },
+      { t: TARGETS[0], diff: Infinity }
+    ).t;
+
+    const canvas = document.createElement("canvas");
+    canvas.width = target.w;
+    canvas.height = target.h;
+
+    const ctx = canvas.getContext("2d");
+
+    // Black bars
+    ctx.fillStyle = "black";
+    ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+    // Scale image to fit
+    const scale = Math.min(
+      canvas.width / img.width,
+      canvas.height / img.height
+    );
+
+    const drawW = img.width * scale;
+    const drawH = img.height * scale;
+
+    const x = (canvas.width - drawW) / 2;
+    const y = (canvas.height - drawH) / 2;
+
+    ctx.drawImage(img, x, y, drawW, drawH);
+
+    return canvas.toDataURL("image/jpeg", 0.92);
+  }
+
   function processScreenshot(popup) {
     const screenshotValue = popup.querySelector("#screenshot-value");
     const preview = popup.querySelector("#screenshot-preview");
@@ -57,29 +103,15 @@
 
         const img = new Image();
         img.onload = () => {
-          const valid = [
-            [800, 450],
-            [400, 240],
-            [320, 240],
-            [640, 480],
-          ].some(([w, h]) => img.width === w && img.height === h);
+          const scaledDataUrl = scaleToJuxtResolution(img);
 
-          if (!valid) {
-            alert(
-              "Invalid screenshot resolution.\n" +
-                "Allowed: 800×450, 400×240, 320×240, 640×480"
-            );
-            fileInput.value = "";
-            return;
-          }
-
-          // Strip data URL prefix (server expects raw base64)
-          const base64 = dataUrl.replace(/^data:image\/jpeg;base64,/, "");
+          // Strip prefix for server
+          const base64 = scaledDataUrl.replace(/^data:image\/jpeg;base64,/, "");
 
           screenshotValue.value = base64;
 
-          // Preview the image
-          preview.src = dataUrl;
+          // Preview scaled image
+          preview.src = scaledDataUrl;
           preview.style.display = "block";
 
           // Prevent uploading both screenshot AND memo (painting/drawing)
