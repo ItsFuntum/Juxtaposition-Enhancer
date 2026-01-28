@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         Juxtaposition Pretendo Enhancer
 // @namespace    https://github.com/ItsFuntum/Juxtaposition-Enhancer
-// @version      2026-01-26
+// @version      2026-01-28
 // @description  Userscript that improves Pretendo's Juxtaposition on the web.
 // @author       Funtum
 // @match        *://juxt.pretendo.network/*
@@ -66,39 +66,50 @@
     );
   }
 
-  function lockPaintingScroll(wrapper) {
-    if (!isPaintingVisible(wrapper)) {
-      return;
-    }
+  let paintingBlockHandler = null;
 
-    const block = (e) => {
+  function lockPaintingScroll(wrapper) {
+    if (!isPaintingVisible(wrapper)) return;
+
+    paintingBlockHandler = (e) => {
+      // Allow taps/clicks
+      if (e.type === "touchstart" || e.type === "touchend") return;
+
       e.preventDefault();
       e.stopPropagation();
-      return false;
     };
 
-    // Lock page scroll
     document.documentElement.style.overflow = "hidden";
     document.body.style.overflow = "hidden";
     document.body.style.position = "fixed";
     document.body.style.width = "100%";
 
-    // Block ALL scroll-related events
-    ["touchstart", "touchmove", "touchend", "wheel", "pointermove"].forEach(
-      (evt) => {
-        wrapper.addEventListener(evt, block, {
-          passive: false,
-          capture: true,
-        });
-      },
-    );
+    // Only block movement-related events
+    ["touchmove", "wheel"].forEach((evt) => {
+      wrapper.addEventListener(evt, paintingBlockHandler, {
+        passive: false,
+        capture: true,
+      });
+    });
   }
 
   function unlockPaintingScroll() {
+    const wrapper = document.getElementById("painting-wrapper");
+
     document.documentElement.style.overflow = "";
     document.body.style.overflow = "";
     document.body.style.position = "";
     document.body.style.width = "";
+
+    if (wrapper && paintingBlockHandler) {
+      ["touchmove", "wheel"].forEach((evt) => {
+        wrapper.removeEventListener(evt, paintingBlockHandler, {
+          capture: true,
+        });
+      });
+    }
+
+    paintingBlockHandler = null;
   }
 
   function override_closePainting() {
