@@ -71,12 +71,17 @@
   function lockPaintingScroll(wrapper) {
     if (!isPaintingVisible(wrapper)) return;
 
-    paintingBlockHandler = (e) => {
-      // Allow taps/clicks
-      if (e.type === "touchstart" || e.type === "touchend") return;
+    const canvas = wrapper.querySelector("#painting");
 
-      e.preventDefault();
-      e.stopPropagation();
+    paintingBlockHandler = (e) => {
+      // Allow all events that start on the canvas
+      if (canvas && canvas.contains(e.target)) return;
+
+      // Block page scroll gestures
+      if (e.type === "touchmove" || e.type === "wheel") {
+        e.preventDefault();
+        e.stopPropagation();
+      }
     };
 
     document.documentElement.style.overflow = "hidden";
@@ -84,7 +89,6 @@
     document.body.style.position = "fixed";
     document.body.style.width = "100%";
 
-    // Only block movement-related events
     ["touchmove", "wheel"].forEach((evt) => {
       wrapper.addEventListener(evt, paintingBlockHandler, {
         passive: false,
