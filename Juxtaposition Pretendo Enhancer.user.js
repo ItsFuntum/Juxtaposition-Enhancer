@@ -13,6 +13,9 @@
 (function () {
   "use strict";
 
+  let undoStack = [];
+  const MAX_UNDO = 20;
+
   const communityPage = window.location.pathname.match(/^\/titles\/(\d+)/);
   const postsPage = window.location.pathname.match(/posts/);
   const myMii = document.querySelector(".mii-icon")?.src;
@@ -114,6 +117,101 @@
     }
 
     paintingBlockHandler = null;
+  }
+
+  function pushUndoState(canvas) {
+    const ctx = canvas.getContext("2d");
+    try {
+      const data = ctx.getImageData(0, 0, canvas.width, canvas.height);
+      undoStack.push(data);
+
+      // Cap memory usage
+      if (undoStack.length > MAX_UNDO) {
+        undoStack.shift();
+      }
+    } catch (e) {
+      console.warn("Undo snapshot failed", e);
+    }
+  }
+
+  function hookUndoTracking(wrapper) {
+    const canvas = wrapper.querySelector("#painting");
+    if (!canvas) return;
+
+    let drawing = false;
+
+    const start = () => {
+      drawing = true;
+    };
+
+    const end = () => {
+      if (!drawing) return;
+      drawing = false;
+      pushUndoState(canvas);
+    };
+
+    canvas.addEventListener("pointerdown", start);
+    canvas.addEventListener("pointerup", end);
+    canvas.addEventListener("pointercancel", end);
+    canvas.addEventListener("pointerleave", end);
+
+    // Initial blank state
+    pushUndoState(canvas);
+  }
+
+  function undoCanvas(wrapper) {
+    const canvas = wrapper.querySelector("#painting");
+    if (!canvas) return;
+
+    const ctx = canvas.getContext("2d");
+
+    // Need at least 2 states (current + previous)
+    if (undoStack.length < 2) return;
+
+    // Drop current state
+    undoStack.pop();
+
+    // Restore previous
+    const prev = undoStack[undoStack.length - 1];
+    ctx.putImageData(prev, 0, 0);
+  }
+
+  function clearCanvas(wrapper) {
+    const canvas = wrapper.querySelector("#painting");
+    if (!canvas) return;
+
+    const ctx = canvas.getContext("2d");
+
+    ctx.save();
+    ctx.setTransform(1, 0, 0, 1, 0, 0);
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+    ctx.fillStyle = "#fff";
+    ctx.fillRect(0, 0, canvas.width, canvas.height);
+    ctx.restore();
+
+    // Reset undo stack
+    undoStack = [];
+    pushUndoState(canvas);
+  }
+
+  function hookPaintingButtons(wrapper) {
+    const clearBtn = wrapper.querySelector("button.clear");
+    const undoBtn = wrapper.querySelector(".tools button.undo");
+
+    if (clearBtn) {
+      clearBtn.addEventListener("click", (e) => {
+        e.preventDefault();
+        e.stopPropagation();
+        clearCanvas(wrapper);
+      });
+    }
+    if (undoBtn) {
+      undoBtn.addEventListener("click", (e) => {
+        e.preventDefault();
+        e.stopPropagation();
+        undoCanvas(wrapper);
+      });
+    }
   }
 
   function override_closePainting() {
@@ -411,7 +509,7 @@
 <div id="painting-content">
   <div class="tools">
     <div>
-      <button class="clear" onclick="clearCanvas()"></button>
+      <button class="clear"></button>
       <button class="undo"></button>
     </div>
     <div>
@@ -432,6 +530,9 @@
 
       document.querySelector(".community-top").appendChild(postPage);
       document.querySelector(".community-top").appendChild(paintingWrapper);
+
+      hookUndoTracking(paintingWrapper);
+      hookPaintingButtons(paintingWrapper);
 
       const canvas = paintingWrapper.querySelector("#painting");
       if (canvas) {
@@ -567,7 +668,7 @@
 <div id="painting-content">
   <div class="tools">
     <div>
-      <button class="clear" onclick="clearCanvas()"></button>
+      <button class="clear"></button>
       <button class="undo"></button>
     </div>
     <div>
@@ -588,6 +689,9 @@
 
     postsWrapper.appendChild(postPage);
     postsWrapper.appendChild(paintingWrapper);
+
+    hookUndoTracking(paintingWrapper);
+    hookPaintingButtons(paintingWrapper);
 
     const canvas = paintingWrapper.querySelector("#painting");
     if (canvas) {
