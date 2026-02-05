@@ -13,6 +13,26 @@
 (function () {
   "use strict";
 
+  const style = document.createElement("style");
+  style.textContent = `
+  .post-removed {
+    background: rgba(255, 0, 0, 0.1);
+    border: 1px solid rgba(255, 0, 0, 1);
+  }
+
+  .moderation-info-btn {
+    margin-left: 8px;
+    background: #661111;
+    color: #fff;
+    border: 1px solid #aa4444;
+    border-radius: 6px;
+    padding: 4px 8px;
+    font-size: 12px;
+    cursor: pointer;
+  }
+`;
+  document.head.appendChild(style);
+
   let undoStack = [];
   const MAX_UNDO = 20;
 
@@ -978,12 +998,14 @@
 
       // Render replies
       function renderReply(reply) {
+        const isRemoved = reply.removed === true;
+
         //Hide Load More button
         const loadMoreBtn = document.getElementById("load-more");
         if (loadMoreBtn) loadMoreBtn.style.display = "none";
 
         const post = document.createElement("div");
-        post.className = "posts-wrapper";
+        post.className = `posts-wrapper ${isRemoved ? "post-removed" : ""}`;
         post.id = reply.id;
 
         post.innerHTML = `
@@ -1001,6 +1023,20 @@
         </div>
 
         <div class="post-buttons-wrapper">
+
+        ${
+          isRemoved
+            ? `<button
+         class="moderation-info-btn"
+         data-removed-at="${reply.removed_at}"
+         data-removed-by="${reply.removed_by}"
+         data-removed-reason="${encodeURIComponent(reply.removed_reason || "")}">
+         🚫 View Moderation Info
+       </button>`
+            : ""
+        }
+
+
 			
 			<span data-post="${reply.id}" class="empathy-button ">
 
@@ -1075,6 +1111,24 @@
     yeahsTab.after(clone);
   }
 
+  function moderationInfoHandler() {
+    document.addEventListener("click", (e) => {
+      const btn = e.target.closest(".moderation-info-btn");
+      if (!btn) return;
+
+      const removedAt = new Date(btn.dataset.removedAt);
+      const removedBy = btn.dataset.removedBy;
+      const reason = decodeURIComponent(btn.dataset.removedReason || "");
+
+      alert(
+        `🚫 Post Removed\n\n` +
+          `Reason:\n${reason || "Not specified"}\n\n` +
+          `Removed by: ${removedBy}\n` +
+          `Removed at: ${removedAt.toLocaleString()}`,
+      );
+    });
+  }
+
   let applyEnhancements;
 
   if (postsPage) {
@@ -1096,6 +1150,7 @@
     applyEnhancements = () => {
       addViewLikes();
       addRepliesTab();
+      moderationInfoHandler();
     };
   } else {
     applyEnhancements = () => {
