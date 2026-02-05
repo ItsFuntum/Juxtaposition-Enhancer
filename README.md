@@ -1,13 +1,15 @@
 # Juxtaposition-Enhancer
 Userscript that improves Pretendo's Juxtaposition on the web.
 
-The userscript does things that already exist on other platforms but for some reason *aren't* on the PC/Mobile website, and I've got no idea why so I'm doing it myself.
+The userscript does things that already exist on other platforms but for some reason *aren't* on the PC/Mobile website, and I've got no idea why so I'm doing it myself. It also adds a few QoL features!
 
 ## Features
 Currently it allows you to:
 * Create posts (Tip: Click on a community to post!)
 * Reply to posts
 * View who yeah'd a post (only works on your own posts)
+* View your reply history through the User Page
+* View your banned replies and information related to the ban
 
 ## Installation
 You will need a userscript manager, I recommend [Tampermonkey](https://www.tampermonkey.net).
