@@ -909,6 +909,38 @@
     }
   }
 
+  function renderPostMedia(reply) {
+    let html = "";
+
+    // Screenshot
+    if (reply.screenshot && reply.pid && reply.id) {
+      const screenshotUrl = `https://r2-cdn.pretendo.cc/screenshots/${reply.pid}/${reply.id}.jpg`;
+
+      html += `
+      <img
+        class="screenshot"
+        src="${screenshotUrl}"
+        style="max-width:100%; border-radius:6px; margin-top:6px;"
+      >
+    `;
+    }
+
+    // Painting
+    if (reply.painting && reply.pid && reply.id) {
+      const paintingUrl = `https://r2-cdn.pretendo.cc/paintings/${reply.pid}/${reply.id}.png`;
+
+      html += `
+      <img
+        class="painting"
+        src="${paintingUrl}"
+        style="max-width:100%; border-radius:6px; margin-top:6px;"
+      >
+    `;
+    }
+
+    return html;
+  }
+
   function addRepliesTab() {
     const yeahsTab = document.getElementById("tab-header-yeahs");
     if (!yeahsTab) return;
@@ -964,7 +996,8 @@
         </div>
 
         <div class="post-content" id="post-content-${reply.id}" onclick="location.href='/posts/${reply.id}'">
-          <p>${reply.body}</p>
+          ${reply.body ? `<p>${reply.body}</p>` : ""}
+          ${renderPostMedia(reply)}
         </div>
 
         <div class="post-buttons-wrapper">
