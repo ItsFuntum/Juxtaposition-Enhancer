@@ -974,13 +974,13 @@
 				<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-heart">
     <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"></path>
 </svg>
-				<h4 id="count-${reply.id}">0</h4>
+				<h4 id="count-${reply.id}">${reply.empathy_count ?? 0}</h4>
 			</span>
 			
 			
 			<span class="reply-button">
 				<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 13 13.311"><g id="Icon_feather-corner-down-right" data-name="Icon feather-corner-down-right" transform="translate(-5.25 -5.25)"><path id="Path_47" data-name="Path 47" d="M22.5,15l3.594,3.594L22.5,22.188" transform="translate(-8.594 -4.688)" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5"></path><path id="Path_48" data-name="Path 48" d="M6,6v5.031a2.875,2.875,0,0,0,2.875,2.875H17.5" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5"></path></g></svg>
-				<h4>0</h4>
+				<h4>${reply.reply_count ?? 0}</h4>
 			</span>
 			
 			
