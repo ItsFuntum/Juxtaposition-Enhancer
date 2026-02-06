@@ -20,7 +20,7 @@
     border: 1px solid rgba(255, 0, 0, 1);
   }
 
-  .moderation-info-btn {
+  .removal-info-btn {
     margin-left: 8px;
     background: #661111;
     color: #fff;
@@ -44,11 +44,8 @@
     ? myMii.substring(0, myMii.lastIndexOf("/"))
     : null;
 
-  if (window.__moderationHandlerAttached) return;
-  window.__moderationHandlerAttached = true;
-
   document.addEventListener("click", (e) => {
-    const btn = e.target.closest(".moderation-info-btn");
+    const btn = e.target.closest(".removal-info-btn");
     if (!btn) return;
 
     e.preventDefault();
@@ -1049,11 +1046,11 @@
         ${
           isRemoved
             ? `<button
-         class="moderation-info-btn"
+         class="removal-info-btn"
          data-removed-at="${reply.removed_at}"
          data-removed-by="${reply.removed_by}"
          data-removed-reason="${encodeURIComponent(reply.removed_reason || "")}">
-         🚫 View Moderation Info
+         🚫 View Removal Info
        </button>`
             : ""
         }
