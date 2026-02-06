@@ -1035,7 +1035,7 @@
           <img class="user-icon" src="${myMiiSubstring}/normal_face.png" data-pjax="/users/show?pid=${reply.userId}">
           <div class="post-meta-wrapper">
             <h3><a href="/users/show?pid=${reply.userId}">${reply.screen_name}</a></h3>
-            <h4>${reply.created_at || ""}</h4>
+            <h4>${new Date(reply.created_at || "").toLocaleString()}</h4>
           </div>
         </div>
 
