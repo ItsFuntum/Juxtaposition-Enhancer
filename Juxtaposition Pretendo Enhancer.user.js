@@ -44,6 +44,28 @@
     ? myMii.substring(0, myMii.lastIndexOf("/"))
     : null;
 
+  if (window.__moderationHandlerAttached) return;
+  window.__moderationHandlerAttached = true;
+
+  document.addEventListener("click", (e) => {
+    const btn = e.target.closest(".moderation-info-btn");
+    if (!btn) return;
+
+    e.preventDefault();
+    e.stopPropagation();
+
+    const removedAt = new Date(btn.dataset.removedAt);
+    const removedBy = btn.dataset.removedBy;
+    const reason = decodeURIComponent(btn.dataset.removedReason || "");
+
+    alert(
+      `🚫 Post Removed\n\n` +
+        `Reason:\n${reason || "Not specified"}\n\n` +
+        `Removed by: ${removedBy}\n` +
+        `Removed at: ${removedAt.toLocaleString()}`,
+    );
+  });
+
   // --- Wait until .community-info exists ---
   function waitForCommunityInfo(callback) {
     const container = document.querySelector(".community-info");
@@ -1111,24 +1133,6 @@
     yeahsTab.after(clone);
   }
 
-  function moderationInfoHandler() {
-    document.addEventListener("click", (e) => {
-      const btn = e.target.closest(".moderation-info-btn");
-      if (!btn) return;
-
-      const removedAt = new Date(btn.dataset.removedAt);
-      const removedBy = btn.dataset.removedBy;
-      const reason = decodeURIComponent(btn.dataset.removedReason || "");
-
-      alert(
-        `🚫 Post Removed\n\n` +
-          `Reason:\n${reason || "Not specified"}\n\n` +
-          `Removed by: ${removedBy}\n` +
-          `Removed at: ${removedAt.toLocaleString()}`,
-      );
-    });
-  }
-
   let applyEnhancements;
 
   if (postsPage) {
@@ -1150,7 +1154,6 @@
     applyEnhancements = () => {
       addViewLikes();
       addRepliesTab();
-      moderationInfoHandler();
     };
   } else {
     applyEnhancements = () => {
