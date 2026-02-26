@@ -771,16 +771,66 @@
   }
 
   let cachedUserData = null;
+  let cachedUserDataTime = 0;
+
+  const CACHE_KEY = "juxt_userData";
+  const CACHE_TIME_KEY = "juxt_userData_time";
+  const CACHE_TTL = 30 * 60 * 1000; // Check after 30 minutes
 
   async function getUserData() {
-    if (cachedUserData) return cachedUserData;
+    const now = Date.now();
 
+    // In-memory cache
+    if (cachedUserData && now - cachedUserDataTime < CACHE_TTL) {
+      return cachedUserData;
+    }
+
+    // localStorage cache
+    const saved = localStorage.getItem(CACHE_KEY);
+    const savedTime = localStorage.getItem(CACHE_TIME_KEY);
+
+    if (saved && savedTime && now - savedTime < CACHE_TTL) {
+      try {
+        cachedUserData = JSON.parse(saved);
+        cachedUserDataTime = Number(savedTime);
+        return cachedUserData;
+      } catch {
+        // Corrupted localStorage cache
+      }
+    }
+
+    // Network fetch
     const res = await fetch(`/users/downloadUserData.json`, {
       credentials: "include",
     });
 
-    cachedUserData = await res.json();
-    return cachedUserData;
+    const data = await res.json();
+
+    cachedUserData = data;
+    cachedUserDataTime = now;
+
+    localStorage.setItem(CACHE_KEY, JSON.stringify(data));
+    localStorage.setItem(CACHE_TIME_KEY, now.toString());
+
+    return data;
+  }
+
+  async function forceRefreshUserData() {
+    const res = await fetch(`/users/downloadUserData.json`, {
+      credentials: "include",
+    });
+
+    const data = await res.json();
+
+    const now = Date.now();
+
+    cachedUserData = data;
+    cachedUserDataTime = now;
+
+    localStorage.setItem(CACHE_KEY, JSON.stringify(data));
+    localStorage.setItem(CACHE_TIME_KEY, now.toString());
+
+    return data;
   }
 
   function addViewLikes() {
@@ -837,24 +887,47 @@
   }
 
   async function fetchYeahsID(postId) {
-    try {
-      const localData = await getUserData();
+    const postsWrapper = document.getElementById(postId);
+    if (!postsWrapper) return [];
 
-      // Find the post by postId
-      const postData = localData.posts.find(
+    // Read current empathy count from page
+    const currentCountEl = postsWrapper.querySelector(`h4[id='count-${postId}']`);
+    const currentCount = currentCountEl ? Number(currentCountEl.textContent) : 0;
+
+    let localData = await getUserData();
+
+    const postData = localData.posts.find(
+      (post) => post.id.toString() === postId,
+    );
+
+    if (!postData) return [];
+
+    const cachedCount = postData.yeahs.length;
+
+    // If the post has more or less Yeahs, cache is outdated
+    if (currentCount !== cachedCount) {
+      console.log("Refreshing user data, different likes detected");
+
+      // Force fresh fetch (ignore cache)
+      localData = await forceRefreshUserData();
+
+      const refreshedPost = localData.posts.find(
         (post) => post.id.toString() === postId,
       );
-      if (!postData) return [];
 
-      // Return an array of objects with id and Mii URL
-      return postData.yeahs.map((pid) => ({
+      if (!refreshedPost) return [];
+
+      return refreshedPost.yeahs.map((pid) => ({
         id: pid,
         miiUrl: `https://r2-cdn.pretendo.cc/mii/${pid}/normal_face.png`,
       }));
-    } catch (err) {
-      console.error("Error fetching likers:", err);
-      return [];
     }
+
+    // Use cached data
+    return postData.yeahs.map((pid) => ({
+      id: pid,
+      miiUrl: `https://r2-cdn.pretendo.cc/mii/${pid}/normal_face.png`,
+    }));
   }
 
   async function showYeahsPopup(postId) {
