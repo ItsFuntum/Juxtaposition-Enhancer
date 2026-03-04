@@ -30,6 +30,30 @@
     font-size: 12px;
     cursor: pointer;
   }
+
+  /* Fix reply-button and empathy-button height issue */
+  .post-buttons-wrapper .reply-button,
+  .post-buttons-wrapper .empathy-button {
+    display: flex;
+    align-items: center;
+    gap: 4px; /* space between icon and number */
+  }
+
+  .post-buttons-wrapper .reply-button h4,
+  .post-buttons-wrapper .empathy-button h4 {
+    margin: 0;
+    line-height: 1;
+  }
+
+  /* Make "View Likers" button align like other post buttons */
+  .posts-wrapper .post-buttons-wrapper .view-likers-btn {
+    display: flex;
+    align-items: center;   /* vertical center */
+    gap: 4px;              /* space between icon and text */
+    padding: 4px 8px;      /* keep your existing padding */
+    font-size: 12px;       /* match number/icon size */
+    line-height: 3;
+  }
 `;
   document.head.appendChild(style);
 
