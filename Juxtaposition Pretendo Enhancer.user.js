@@ -901,8 +901,12 @@
     if (!postsWrapper) return [];
 
     // Read current empathy count from page
-    const currentCountEl = postsWrapper.querySelector(`h4[id='count-${postId}']`);
-    const currentCount = currentCountEl ? Number(currentCountEl.textContent) : 0;
+    const currentCountEl = postsWrapper.querySelector(
+      `h4[id='count-${postId}']`,
+    );
+    const currentCount = currentCountEl
+      ? Number(currentCountEl.textContent)
+      : 0;
 
     let localData = await getUserData();
 
@@ -1102,9 +1106,14 @@
       function renderReply(reply) {
         const isRemoved = reply.removed === true;
 
-        //Hide Load More button
-        const loadMoreBtn = document.getElementById("load-more");
-        if (loadMoreBtn) loadMoreBtn.style.display = "none";
+        // Remove Load More button if it exists
+        const loadMoreWrappers =
+          document.querySelectorAll("div#wrapper.bottom");
+        loadMoreWrappers.forEach((wrapper) => {
+          const btn = wrapper.querySelector("#load-more");
+          if (btn) btn.remove(); // Remove button
+          wrapper.remove(); // Remove the wrapper div itself
+        });
 
         const post = document.createElement("div");
         post.className = `posts-wrapper ${isRemoved ? "post-removed" : ""}`;
@@ -1176,19 +1185,6 @@
       // Populate wrapper
       replies.forEach((r) => repliesWrapper.appendChild(renderReply(r)));
 
-      // Insert into the page safely
-      const container =
-        document.querySelector(".community-top") ||
-        document.querySelector("main") ||
-        document.body;
-
-      const loadMoreBtn = document.getElementById("load-more");
-      if (loadMoreBtn) {
-        loadMoreBtn.before(repliesWrapper); // insert before button
-      } else {
-        container.appendChild(repliesWrapper);
-      }
-
       // Re-bind empathy buttons
       if (window.applyEnhancements) {
         applyEnhancements();
@@ -1205,9 +1201,6 @@
           btn.setAttribute("aria-expanded", "true");
         });
       });
-
-      // Disable Load More to prevent auto-loading more posts
-      if (loadMoreBtn) loadMoreBtn.style.display = "none";
     });
 
     yeahsTab.after(clone);
