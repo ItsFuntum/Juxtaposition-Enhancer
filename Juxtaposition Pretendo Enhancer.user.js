@@ -465,6 +465,16 @@
     });
   }
 
+  function escapeHTML(str) {
+    if (typeof str !== "string") return "";
+    return str
+      .replaceAll("&", "&amp;")
+      .replaceAll("<", "&lt;")
+      .replaceAll(">", "&gt;")
+      .replaceAll('"', "&quot;")
+      .replaceAll("'", "&#039;");
+  }
+
   if (communityPage) {
     const communityId = communityPage[1];
     waitForCommunityInfo(async () => {
@@ -1098,19 +1108,19 @@
 
         const post = document.createElement("div");
         post.className = `posts-wrapper ${isRemoved ? "post-removed" : ""}`;
-        post.id = reply.id;
+        post.id = String(reply.id).replace(/[^a-zA-Z0-9_-]/g, "");
 
         post.innerHTML = `
-        <div class="post-user-info-wrapper" id="${reply.id}">
+        <div class="post-user-info-wrapper" id="${escapeHTML(String(reply.id))}">
           <img class="user-icon" src="${myMiiSubstring}/normal_face.png" data-pjax="/users/show?pid=${reply.userId}">
           <div class="post-meta-wrapper">
-            <h3><a href="/users/show?pid=${reply.userId}">${reply.screen_name}</a></h3>
+            <h3><a href="/users/show?pid=${encodeURIComponent(reply.userId)}">${escapeHTML(reply.screen_name)}</a></h3>
             <h4>${new Date(reply.created_at || "").toLocaleString()}</h4>
           </div>
         </div>
 
-        <div class="post-content" id="post-content-${reply.id}" onclick="location.href='/posts/${reply.id}'">
-          ${reply.body ? `<p>${reply.body}</p>` : ""}
+        <div class="post-content" id="post-content-${escapeHTML(String(reply.id))}" onclick="location.href='/posts/${encodeURIComponent(reply.id)}'">
+          ${reply.body ? `<p>${escapeHTML(reply.body)}</p>` : ""}
           ${renderPostMedia(reply)}
         </div>
 
@@ -1120,8 +1130,8 @@
           isRemoved
             ? `<button
          class="removal-info-btn"
-         data-removed-at="${reply.removed_at}"
-         data-removed-by="${reply.removed_by}"
+         data-removed-at="${escapeHTML(reply.removed_at)}"
+         data-removed-by="${escapeHTML(reply.removed_by)}"
          data-removed-reason="${encodeURIComponent(reply.removed_reason || "")}">
          🚫 View Removal Info
        </button>`
@@ -1130,25 +1140,25 @@
 
 
 			
-			<span data-post="${reply.id}" class="empathy-button ">
+			<span data-post="${escapeHTML(String(reply.id))}" class="empathy-button ">
 
 				<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-heart">
     <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"></path>
 </svg>
-				<h4 id="count-${reply.id}">${reply.empathy_count ?? 0}</h4>
+				<h4 id="count-${reply.id}">${Number(reply.empathy_count) || 0}</h4>
 			</span>
 			
 			
 			<span class="reply-button">
 				<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 13 13.311"><g id="Icon_feather-corner-down-right" data-name="Icon feather-corner-down-right" transform="translate(-5.25 -5.25)"><path id="Path_47" data-name="Path 47" d="M22.5,15l3.594,3.594L22.5,22.188" transform="translate(-8.594 -4.688)" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5"></path><path id="Path_48" data-name="Path 48" d="M6,6v5.031a2.875,2.875,0,0,0,2.875,2.875H17.5" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5"></path></g></svg>
-				<h4>${reply.reply_count ?? 0}</h4>
+				<h4>${Number(reply.reply_count) || 0}</h4>
 			</span>
 			
 			
 			<span type="button" class="post-hamburger-button" aria-haspopup="menu" aria-expanded="false">
 				<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-menu"><line x1="3" y1="12" x2="21" y2="12"></line><line x1="3" y1="6" x2="21" y2="6"></line><line x1="3" y1="18" x2="21" y2="18"></line></svg>
 
-				<ul class="post-hamburger" role="menu" data-post="${reply.id}">
+				<ul class="post-hamburger" role="menu" data-post="${escapeHTML(String(reply.id))}">
 					<li role="menuitem" data-action="report"><svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="#ffffff" viewBox="0 0 256 256"><path stroke="currentColor" stroke-width="4" d="M34.76,42A8,8,0,0,0,32,48V216a8,8,0,0,0,16,0V171.77c26.79-21.16,49.87-9.75,76.45,3.41,16.4,8.11,34.06,16.85,53,16.85,13.93,0,28.54-4.75,43.82-18a8,8,0,0,0,2.76-6V48A8,8,0,0,0,210.76,42c-28,24.23-51.72,12.49-79.21-1.12C103.07,26.76,70.78,10.79,34.76,42ZM208,164.25c-26.79,21.16-49.87,9.74-76.45-3.41-25-12.35-52.81-26.13-83.55-8.4V51.79c26.79-21.16,49.87-9.75,76.45,3.4,25,12.35,52.82,26.13,83.55,8.4Z"></path></svg> Report Post</li>
 					
 					<li role="menuitem" data-action="delete" data-moderator="false"><svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-trash-2"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path><line x1="10" y1="11" x2="10" y2="17"></line><line x1="14" y1="11" x2="14" y2="17"></line></svg>
