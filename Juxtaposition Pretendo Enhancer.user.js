@@ -1107,6 +1107,55 @@
     return html;
   }
 
+  function addSortControl() {
+    const postsContainer = document.querySelector(".community-page-post-box");
+    if (!postsContainer) return;
+
+    // Avoid adding multiple dropdowns
+    if (document.querySelector(".sort-posts")) return;
+
+    const sortContainer = document.createElement("div");
+    sortContainer.className = "sort-posts";
+    sortContainer.style.margin = "10px 0";
+    sortContainer.style.display = "flex";
+    sortContainer.style.gap = "10px";
+    sortContainer.style.alignItems = "center";
+
+    const label = document.createElement("span");
+    label.textContent = "Sort by:";
+
+    const select = document.createElement("select");
+    select.innerHTML = `
+    <option value="new">New</option>
+    <option value="old">Old</option>
+  `;
+    select.style.padding = "4px 6px";
+    select.style.borderRadius = "6px";
+
+    sortContainer.appendChild(label);
+    sortContainer.appendChild(select);
+
+    // Place at the top of the posts list
+    postsContainer.prepend(sortContainer);
+
+    select.addEventListener("change", () => {
+      const posts = Array.from(
+        postsContainer.querySelectorAll(".posts-wrapper"),
+      );
+      posts.sort((a, b) => {
+        const dateA = new Date(
+          a.querySelector(".post-meta-wrapper h4").textContent,
+        );
+        const dateB = new Date(
+          b.querySelector(".post-meta-wrapper h4").textContent,
+        );
+        return select.value === "new" ? dateB - dateA : dateA - dateB;
+      });
+
+      posts.forEach((p) => postsContainer.appendChild(p));
+    });
+  }
+
   function addRepliesTab() {
     const yeahsTab = document.getElementById("tab-header-yeahs");
     if (!yeahsTab) return;
@@ -1238,6 +1287,8 @@
 
       // Populate wrapper
       replies.forEach((r) => repliesWrapper.appendChild(renderReply(r)));
+
+      addSortControl();
 
       // Re-bind empathy buttons
       if (window.applyEnhancements) {
