@@ -1154,8 +1154,9 @@
     sortContainer.appendChild(label);
     sortContainer.appendChild(select);
 
-    // Place at the top of the posts list
-    postsContainer.prepend(sortContainer);
+    // Insert sortContainer after buttons tabs
+    const tabs = postsContainer.querySelector(".buttons.tabs");
+    tabs.after(sortContainer);
 
     select.addEventListener("change", () => {
       sortPosts(postsContainer, select.value);
