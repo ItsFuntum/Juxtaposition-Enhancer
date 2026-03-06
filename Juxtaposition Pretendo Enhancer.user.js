@@ -640,7 +640,7 @@
       }
 
       await loadScriptOnce(
-        "https://juxt.pretendo.network/js/painting.global.js",
+        "https://juxt.pretendo.network/assets/web/js/painting.global.js",
       );
       await loadScriptOnce(
         "https://cdnjs.cloudflare.com/ajax/libs/pako/2.1.0/pako.min.js",
@@ -798,7 +798,9 @@
       });
     }
 
-    await loadScriptOnce("https://juxt.pretendo.network/js/painting.global.js");
+    await loadScriptOnce(
+      "https://juxt.pretendo.network/assets/web/js/painting.global.js",
+    );
     await loadScriptOnce(
       "https://cdnjs.cloudflare.com/ajax/libs/pako/2.1.0/pako.min.js",
     );
