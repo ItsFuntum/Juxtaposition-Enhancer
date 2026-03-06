@@ -1109,6 +1109,23 @@
     return html;
   }
 
+  function sortPosts(postsContainer, mode = "new") {
+    const posts = Array.from(postsContainer.querySelectorAll(".posts-wrapper"));
+
+    posts.sort((a, b) => {
+      const dateA = new Date(
+        a.querySelector(".post-meta-wrapper h4").textContent,
+      );
+      const dateB = new Date(
+        b.querySelector(".post-meta-wrapper h4").textContent,
+      );
+
+      return mode === "new" ? dateB - dateA : dateA - dateB;
+    });
+
+    posts.forEach((p) => postsContainer.appendChild(p));
+  }
+
   function addSortControl() {
     const postsContainer = document.querySelector(".community-page-post-box");
     if (!postsContainer) return;
@@ -1141,20 +1158,7 @@
     postsContainer.prepend(sortContainer);
 
     select.addEventListener("change", () => {
-      const posts = Array.from(
-        postsContainer.querySelectorAll(".posts-wrapper"),
-      );
-      posts.sort((a, b) => {
-        const dateA = new Date(
-          a.querySelector(".post-meta-wrapper h4").textContent,
-        );
-        const dateB = new Date(
-          b.querySelector(".post-meta-wrapper h4").textContent,
-        );
-        return select.value === "new" ? dateB - dateA : dateA - dateB;
-      });
-
-      posts.forEach((p) => postsContainer.appendChild(p));
+      sortPosts(postsContainer, select.value);
     });
   }
 
@@ -1291,6 +1295,7 @@
       replies.forEach((r) => repliesWrapper.appendChild(renderReply(r)));
 
       addSortControl();
+      sortPosts(repliesWrapper, "new");
 
       // Re-bind empathy buttons
       if (window.applyEnhancements) {
