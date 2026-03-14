@@ -739,7 +739,7 @@
   </div>
 
   <div id="button-wrapper">
-    <input type="submit" class="post-button fixed-bottom-button" value="Post">
+    <input type="submit" class="post-button fixed-bottom-button" value="Reply">
   </div>
 </form>
 `;
