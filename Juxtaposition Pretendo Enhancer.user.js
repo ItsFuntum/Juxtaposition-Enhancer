@@ -526,7 +526,8 @@
       const postPage = document.createElement("div");
       postPage.id = "add-post-page";
       postPage.className = "add-post-page official-user-post";
-      postPage.style.display = "flex";
+      postPage.style.display = "block";
+      postPage.style.margin = "0";
 
       postPage.innerHTML = `
 <form id="posts-form" data-is-own-title="1" data-is-identified="1" action="/posts/new" method="post">
@@ -686,6 +687,7 @@
     postPage.id = "add-post-page";
     postPage.className = "add-post-page official-user-post";
     postPage.style.display = "flex";
+    postPage.style.margin = "0";
 
     postPage.innerHTML = `
 <form id="posts-form" data-is-own-title="1" data-is-identified="1" action="/posts/${postId}/new" method="post">
