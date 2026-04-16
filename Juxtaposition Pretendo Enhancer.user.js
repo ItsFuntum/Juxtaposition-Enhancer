@@ -460,51 +460,6 @@
     return canvas.toDataURL("image/jpeg", 0.92);
   }
 
-  function processScreenshot(popup) {
-    const screenshotValue = popup.querySelector("#screenshot-value");
-    const preview = popup.querySelector("#screenshot-preview");
-    const fileInput = popup.querySelector("#screenshot-input");
-
-    fileInput.addEventListener("change", () => {
-      const file = fileInput.files[0];
-      if (!file) return;
-
-      if (file.type !== "image/jpeg") {
-        alert("Only JPEG screenshots are supported.");
-        fileInput.value = "";
-        return;
-      }
-
-      const reader = new FileReader();
-
-      reader.onload = () => {
-        const dataUrl = reader.result.toString();
-
-        const img = new Image();
-        img.onload = () => {
-          const scaledDataUrl = scaleToJuxtResolution(img);
-
-          // Strip prefix for server
-          const base64 = scaledDataUrl.replace(/^data:image\/jpeg;base64,/, "");
-
-          screenshotValue.value = base64;
-
-          // Preview scaled image
-          preview.src = scaledDataUrl;
-          preview.style.display = "block";
-
-          // Prevent uploading both screenshot AND memo (painting/drawing)
-          const memoValue = popup.querySelector("#memo-value");
-          if (memoValue) memoValue.value = "";
-        };
-
-        img.src = dataUrl;
-      };
-
-      reader.readAsDataURL(file);
-    });
-  }
-
   function escapeHTML(str) {
     if (typeof str !== "string") return "";
     return str
@@ -570,12 +525,6 @@
       <input type="checkbox" id="spoiler" name="spoiler" value="true">
       <span class="checkmark"></span>
     </label>
-  </div>
-
-  <div class="screenshot-upload">
-    <input type="file" id="screenshot-input" accept="image/jpeg">
-    <input type="hidden" name="screenshot" id="screenshot-value">
-    <img id="screenshot-preview" style="display:none; max-width:100%; border-radius:6px;">
   </div>
 
   <div id="button-wrapper">
@@ -648,7 +597,6 @@
       );
 
       override_closePainting();
-      processScreenshot(postPage);
 
       // --- Feeling selector: change Mii expression when clicking buttons ---
       const miiFace = postPage.querySelector("#mii-face");
@@ -732,12 +680,6 @@
     </label>
   </div>
 
-  <div class="screenshot-upload">
-    <input type="file" id="screenshot-input" accept="image/jpeg">
-    <input type="hidden" name="screenshot" id="screenshot-value">
-    <img id="screenshot-preview" style="display:none; max-width:100%; border-radius:6px;">
-  </div>
-
   <div id="button-wrapper">
     <input type="submit" class="post-button fixed-bottom-button" value="Reply">
   </div>
@@ -808,7 +750,6 @@
     );
 
     override_closePainting();
-    processScreenshot(postPage);
 
     // --- Feeling selector: change Mii expression when clicking buttons ---
     const miiFace = postPage.querySelector("#mii-face");
