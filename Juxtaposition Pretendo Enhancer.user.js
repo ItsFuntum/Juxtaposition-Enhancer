@@ -7,7 +7,7 @@
 // @match        *://juxt.pretendo.network/*
 // @grant        none
 // @license      MIT
-// @icon         https://juxt.pretendo.network/web/icons/icon-512x512.png
+// @icon         https://i.ibb.co/wF7J3rfW/cbimage.png
 // ==/UserScript==
 
 (function () {
