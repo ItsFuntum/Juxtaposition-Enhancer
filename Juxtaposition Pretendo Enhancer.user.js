@@ -616,7 +616,7 @@
   // --- Instead of starting with just the observer ---
   async function addReplyBox() {
     const communityLink = document.querySelector(
-      '.post-meta-wrapper h4 a[href^="/titles/"]',
+      '.extra-info a[href^="/titles/"]',
     );
     if (!communityLink) return alert("Cannot find community link");
     const communityId = communityLink
