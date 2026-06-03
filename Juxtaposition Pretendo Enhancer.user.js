@@ -103,13 +103,13 @@
     });
   });
 
-  // --- Wait until .community-info exists ---
+  // --- Wait until .community-page-post-box exists ---
   function waitForCommunityInfo(callback) {
-    const container = document.querySelector(".community-info");
+    const container = document.querySelector(".community-page-post-box");
     if (container) return callback(container);
 
     const observer = new MutationObserver(() => {
-      const container = document.querySelector(".community-info");
+      const container = document.querySelector(".community-page-post-box");
       if (container) {
         observer.disconnect();
         callback(container);
@@ -568,8 +568,8 @@
   <div id="button-wrapper"><button onclick="closePainting(false)">Cancel</button><button class="primary">OK</button></div>
 </div>`;
 
-      document.querySelector(".community-top").appendChild(postPage);
-      document.querySelector(".community-top").appendChild(paintingWrapper);
+      document.querySelector(".page-infobox").appendChild(postPage);
+      document.querySelector(".page-infobox").appendChild(paintingWrapper);
 
       hookUndoTracking(paintingWrapper);
       hookPaintingButtons(paintingWrapper);
@@ -615,21 +615,21 @@
 
   // --- Instead of starting with just the observer ---
   async function addReplyBox() {
-    const communityLink = document.querySelector(
+    const postsWrapper = document.querySelector(".posts-wrapper");
+    if (!postsWrapper) return alert("Cannot find posts wrapper");
+
+    const postId = postsWrapper.id;
+
+    const communityAnchor = document.querySelector(
       '.extra-info a[href^="/titles/"]',
     );
-    if (!communityLink) return alert("Cannot find community link");
-    const communityId = communityLink
-      ? communityLink.href.split("/titles/")[1]
-      : null;
-    const popupBackdrop = document.createElement("div");
-    popupBackdrop.className = "modal-backdrop";
-    popupBackdrop.style.display = "flex";
-    document.body.appendChild(popupBackdrop);
 
-    const postsWrapper = document.querySelector(".posts-wrapper");
-    if (!postsWrapper) return alert("Cannot find parent post ID");
-    const postId = postsWrapper.id;
+    const communityHref = communityAnchor?.getAttribute("href");
+    const communityId = communityHref
+      ? communityHref.split("/titles/")[1]
+      : null;
+
+    if (!communityId) return alert("Cannot find community ID");
 
     const postPage = document.createElement("div");
     postPage.id = "add-post-page";
@@ -1271,9 +1271,7 @@
     };
 
     function addReplyBoxIfNeeded() {
-      const wrapper = document.querySelector(
-        ".community-page-post-box #wrapper",
-      );
+      const wrapper = document.querySelector(".posts-wrapper");
       if (wrapper && !wrapper.dataset.replybox) {
         wrapper.dataset.replybox = "1";
         addReplyBox(wrapper);
