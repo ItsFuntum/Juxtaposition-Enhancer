@@ -1,13 +1,25 @@
 // ==UserScript==
 // @name         Juxtaposition Pretendo Enhancer
 // @namespace    https://github.com/ItsFuntum/Juxtaposition-Enhancer
-// @version      2026.06.03
+// @homepage     https://github.com/ItsFuntum/Juxtaposition-Enhancer
+// @homepageURL  https://github.com/ItsFuntum/Juxtaposition-Enhancer
+// @website      https://github.com/ItsFuntum/Juxtaposition-Enhancer
+// @source       https://github.com/ItsFuntum/Juxtaposition-Enhancer
+// @downloadURL  https://raw.githubusercontent.com/ItsFuntum/Juxtaposition-Enhancer/refs/heads/main/Juxtaposition%20Pretendo%20Enhancer.user.js
+// @updateURL    https://raw.githubusercontent.com/ItsFuntum/Juxtaposition-Enhancer/refs/heads/main/Juxtaposition%20Pretendo%20Enhancer.user.js
+// @version      2026.06.16
 // @description  Userscript that improves Pretendo's Juxtaposition on the web.
 // @author       Funtum
 // @match        *://juxt.pretendo.network/*
 // @grant        none
 // @license      MIT
-// @icon         https://i.ibb.co/wF7J3rfW/cbimage.png
+// @icon         https://juxt.pretendo.network/assets/web/images/icons/icon-192x192.png
+// @run-at       document-body
+// @sandbox      DOM
+// @inject-into  content
+// @tag          social media
+// @tag          utilities
+// @noframes
 // ==/UserScript==
 
 (function () {
@@ -61,8 +73,8 @@
   const MAX_UNDO = 20;
 
   const communityPage = window.location.pathname.match(/^\/titles\/(\d+)/);
-  const postsPage = window.location.pathname.match(/posts/);
-  const mePage = window.location.pathname.match(/users\/me/);
+  const postsPage = window.location.pathname.startsWith('/posts/');
+  const mePage = (window.location.pathname + '/').startsWith('/users/me/');
   const myMii = document.querySelector(".mii-icon")?.src;
   const myMiiSubstring = myMii
     ? myMii.substring(0, myMii.lastIndexOf("/"))
@@ -81,9 +93,9 @@
 
     alert(
       `🚫 Post Removed\n\n` +
-        `Reason:\n${reason || "Not specified"}\n\n` +
-        `Removed by: ${removedBy}\n` +
-        `Removed at: ${removedAt.toLocaleString()}`,
+      `Reason:\n${reason || "Not specified"}\n\n` +
+      `Removed by: ${removedBy}\n` +
+      `Removed at: ${removedAt.toLocaleString()}`,
     );
   });
 
@@ -595,6 +607,7 @@
       await loadScriptOnce(
         "https://cdnjs.cloudflare.com/ajax/libs/pako/2.1.0/pako.min.js",
       );
+      /* global pako */
 
       override_closePainting();
 
@@ -1174,8 +1187,7 @@
 
         <div class="post-buttons-wrapper">
 
-        ${
-          isRemoved
+        ${isRemoved
             ? `<button
          class="removal-info-btn"
          data-removed-at="${escapeHTML(reply.removed_at)}"
@@ -1184,10 +1196,10 @@
          🚫 View Removal Info
        </button>`
             : ""
-        }
+          }
 
 
-			
+
 			<span data-post="${escapeHTML(String(reply.id))}" class="post-button empathy-button ">
 
 				<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-heart">
@@ -1195,14 +1207,14 @@
 </svg>
 				<h4 id="count-${reply.id}">${Number(reply.empathy_count) || 0}</h4>
 			</span>
-			
-			
+
+
 			<span class="post-button reply-button">
 				<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 13 13.311"><g id="Icon_feather-corner-down-right" data-name="Icon feather-corner-down-right" transform="translate(-5.25 -5.25)"><path id="Path_47" data-name="Path 47" d="M22.5,15l3.594,3.594L22.5,22.188" transform="translate(-8.594 -4.688)" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5"></path><path id="Path_48" data-name="Path 48" d="M6,6v5.031a2.875,2.875,0,0,0,2.875,2.875H17.5" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5"></path></g></svg>
 				<h4>${Number(reply.reply_count) || 0}</h4>
 			</span>
-			
-			
+
+
 			<span class="post-button post-hamburger-button" aria-haspopup="menu" aria-expanded="false"><span role="img" aria-label="menu icon" style="line-height:0.7"><svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-menu">
       <line x1="3" y1="12" x2="21" y2="12"></line>
       <line x1="3" y1="6" x2="21" y2="6"></line>
