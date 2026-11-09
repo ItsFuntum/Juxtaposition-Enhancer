@@ -7,7 +7,7 @@
 // @source       https://github.com/ItsFuntum/Juxtaposition-Enhancer
 // @downloadURL  https://raw.githubusercontent.com/ItsFuntum/Juxtaposition-Enhancer/refs/heads/main/Juxtaposition%20Pretendo%20Enhancer.user.js
 // @updateURL    https://raw.githubusercontent.com/ItsFuntum/Juxtaposition-Enhancer/refs/heads/main/Juxtaposition%20Pretendo%20Enhancer.user.js
-// @version      2026.06.16
+// @version      2026.11.09
 // @description  Userscript that improves Pretendo's Juxtaposition on the web.
 // @author       Funtum
 // @match        *://juxt.pretendo.network/*
