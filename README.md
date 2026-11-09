@@ -7,7 +7,6 @@ The userscript does things that already exist on other platforms but for some re
 Currently it allows you to:
 * Create posts (Tip: Click on a community to post!)
 * Reply to posts
-* View who yeah'd a post (only works on your own posts)
 * View your reply history through the User Page
 * View your banned replies and information related to the ban
 
