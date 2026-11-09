@@ -32,40 +32,6 @@
     border: 1px solid rgba(255, 0, 0, 1);
   }
 
-  .removal-info-btn {
-    margin-left: 8px;
-    background: #661111;
-    color: #fff;
-    border: 1px solid #aa4444;
-    border-radius: 6px;
-    padding: 4px 8px;
-    font-size: 12px;
-    cursor: pointer;
-  }
-
-  /* Fix reply-button and empathy-button height issue */
-  .post-buttons-wrapper .reply-button,
-  .post-buttons-wrapper .empathy-button {
-    display: flex;
-    align-items: center;
-    gap: 4px; /* space between icon and number */
-  }
-
-  .post-buttons-wrapper .reply-button h4,
-  .post-buttons-wrapper .empathy-button h4 {
-    margin: 0;
-    line-height: 1;
-  }
-
-  /* Make "View Likers" button align like other post buttons */
-  .posts-wrapper .post-buttons-wrapper .view-likers-btn {
-    display: flex;
-    align-items: center;   /* vertical center */
-    gap: 4px;              /* space between icon and text */
-    padding: 4px 8px;      /* keep your existing padding */
-    font-size: 12px;       /* match number/icon size */
-    line-height: 3;
-  }
 `;
   document.head.appendChild(style);
 
@@ -842,186 +808,6 @@
     return data;
   }
 
-  function addViewLikes() {
-    const wrappers = document.querySelectorAll(".post-buttons-wrapper");
-    const userMiiIconEl = document.querySelector(".mii-icon");
-    if (!userMiiIconEl) return;
-
-    const userMiiIcon_raw = userMiiIconEl.src;
-    const userMiiIcon_base = userMiiIcon_raw.substring(
-      0,
-      userMiiIcon_raw.lastIndexOf("/") + 1,
-    );
-
-    wrappers.forEach((wrapper) => {
-      const postsWrapper = wrapper.closest(".posts-wrapper");
-      const rawPostId = postsWrapper.id;
-      const postId = rawPostId.replace(/^post-/, "");
-      const postMiiIcon_raw = postsWrapper.querySelector(".user-icon")?.src;
-      if (!postMiiIcon_raw) return;
-
-      const postMiiIcon_base = postMiiIcon_raw.substring(
-        0,
-        postMiiIcon_raw.lastIndexOf("/") + 1,
-      );
-
-      // Check if the post was made by the current user
-      if (postMiiIcon_base != userMiiIcon_base) return;
-
-      const empathyCount =
-        postsWrapper.querySelector("h4[id^='count-']").textContent;
-      if (empathyCount <= 0) return;
-
-      if (wrapper.querySelector(".view-likers-btn")) return;
-
-      if (!postsWrapper) return console.warn("Cannot find parent post ID");
-
-      const btn = document.createElement("button");
-      btn.textContent = "❤️ View Likers";
-      btn.className = "view-likers-btn";
-      Object.assign(btn.style, {
-        marginLeft: "8px",
-        background: "#222",
-        color: "white",
-        border: "1px solid #444",
-        borderRadius: "6px",
-        padding: "4px 8px",
-        cursor: "pointer",
-        fontSize: "12px",
-      });
-
-      wrapper.insertBefore(btn, wrapper.firstChild);
-
-      btn.addEventListener("click", () => showYeahsPopup(postId));
-    });
-  }
-
-  async function fetchYeahsID(postId) {
-    const postsWrapper = document.getElementById(postId);
-    if (!postsWrapper) return [];
-
-    // Read current empathy count from page
-    const currentCountEl = postsWrapper.querySelector(
-      `h4[id='count-${postId}']`,
-    );
-    const currentCount = currentCountEl
-      ? Number(currentCountEl.textContent)
-      : 0;
-
-    let localData = await getUserData();
-
-    const postData = localData.posts.find(
-      (post) => post.id.toString() === postId,
-    );
-
-    if (!postData) return [];
-
-    const cachedCount = postData.yeahs.length;
-
-    // If the post has more or less Yeahs, cache is outdated
-    if (currentCount !== cachedCount) {
-      console.log("Refreshing user data, different likes detected");
-
-      // Force fresh fetch (ignore cache)
-      localData = await forceRefreshUserData();
-
-      const refreshedPost = localData.posts.find(
-        (post) => post.id.toString() === postId,
-      );
-
-      if (!refreshedPost) return [];
-
-      return refreshedPost.yeahs.map((pid) => ({
-        id: pid,
-        miiUrl: `https://r2-cdn.pretendo.cc/mii/${pid}/normal_face.png`,
-      }));
-    }
-
-    // Use cached data
-    return postData.yeahs.map((pid) => ({
-      id: pid,
-      miiUrl: `https://r2-cdn.pretendo.cc/mii/${pid}/normal_face.png`,
-    }));
-  }
-
-  async function showYeahsPopup(postId) {
-    const likers = await fetchYeahsID(postId); // now contains [{id, miiUrl}, ...]
-    if (!likers.length) return alert("No likes yet.");
-
-    const popup = document.createElement("div");
-    Object.assign(popup.style, {
-      position: "fixed",
-      top: "50%",
-      left: "50%",
-      transform: "translate(-50%, -50%)",
-      background: "#171717ff",
-      padding: "20px",
-      borderRadius: "10px",
-      border: "1px solid #444",
-      zIndex: "99999",
-      color: "white",
-      width: "300px",
-      maxHeight: "400px",
-      overflowY: "auto",
-      fontFamily: "sans-serif",
-      display: "flex",
-      flexDirection: "column",
-      gap: "10px",
-    });
-
-    const title = document.createElement("h3");
-    title.textContent = "❤️ Liked by:";
-    title.style.marginTop = "0";
-    popup.appendChild(title);
-
-    const likersContainer = document.createElement("div");
-    Object.assign(likersContainer.style, {
-      display: "flex",
-      flexWrap: "wrap",
-      gap: "10px",
-    });
-
-    likers.forEach(({ id, miiUrl }) => {
-      const link = document.createElement("a");
-      link.href = `/users/${id}`;
-      link.target = "_blank"; // Open in new tab
-
-      const miiImg = document.createElement("img");
-      miiImg.src = miiUrl;
-
-      Object.assign(miiImg.style, {
-        width: "50px",
-        height: "50px",
-        borderRadius: "50%",
-        border: "1px solid #444",
-        cursor: "pointer",
-      });
-
-      miiImg.title = `User ID: ${id}`;
-
-      link.appendChild(miiImg);
-      likersContainer.appendChild(link);
-    });
-
-    popup.appendChild(likersContainer);
-
-    const close = document.createElement("button");
-    close.textContent = "Close";
-    Object.assign(close.style, {
-      marginTop: "10px",
-      padding: "6px 12px",
-      border: "none",
-      borderRadius: "6px",
-      cursor: "pointer",
-      background: "#000",
-      color: "white",
-    });
-    close.onclick = () => popup.remove();
-    popup.appendChild(close);
-
-    document.body.appendChild(popup);
-  }
-
   function selectRepliesTab() {
     // Remove "selected" from all tabs
     document.querySelectorAll(".tabs a.selected").forEach((tab) => {
@@ -1281,7 +1067,6 @@
   if (postsPage) {
     applyEnhancements = () => {
       addReplyBoxIfNeeded();
-      addViewLikes();
     };
 
     function addReplyBoxIfNeeded() {
@@ -1293,13 +1078,10 @@
     }
   } else if (mePage) {
     applyEnhancements = () => {
-      addViewLikes();
       addRepliesTab();
     };
   } else {
-    applyEnhancements = () => {
-      addViewLikes();
-    };
+    applyEnhancements = () => {};
   }
 
   // Run immediately for already-loaded content
