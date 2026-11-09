@@ -631,7 +631,8 @@
     const postsWrapper = document.querySelector(".posts-wrapper");
     if (!postsWrapper) return alert("Cannot find posts wrapper");
 
-    const postId = postsWrapper.id;
+    const rawPostId = postsWrapper.id;
+    const postId = rawPostId.replace(/^post-/, "");
 
     const communityAnchor = document.querySelector(
       '.extra-info a[href^="/titles/"]',
@@ -854,7 +855,8 @@
 
     wrappers.forEach((wrapper) => {
       const postsWrapper = wrapper.closest(".posts-wrapper");
-      const postId = postsWrapper.id;
+      const rawPostId = postsWrapper.id;
+      const postId = rawPostId.replace(/^post-/, "");
       const postMiiIcon_raw = postsWrapper.querySelector(".user-icon")?.src;
       if (!postMiiIcon_raw) return;
 
